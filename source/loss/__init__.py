@@ -4,7 +4,7 @@
 # @File    :   __init__.py
 # @Email   :   lianghao@whu.edu.cn
 
-from pixel_loss import *
+from .pixel_loss import *
 
 pixel_loss = {
     "l1": L1Loss,
@@ -12,18 +12,23 @@ pixel_loss = {
     "psnr": PSNRLoss
 }
 
+losses = {
+    "pixel" : {
+        "l1": L1Loss,
+        "mse": MSELoss,
+        "psnr": PSNRLoss
+    }
+}
 
 class Loss:
     def __init__(self, config):
         info = config["loss"]
-
-        pixel = info.get("pixel", False)
         self.pixel_loss = None
-        if pixel:
-            self.pixel_loss = pixel_loss[pixel["name"].lower()](**pixel["param"])
+        if 'pixel' in info.keys():
+            self.pixel_loss = losses['pixel'][info['pixel']['name']](**info['pixel']['param'])
 
     def __call__(self):
-        if not self.pixel_loss:
+        if self.pixel_loss:
             return self.pixel_loss
         else:
             raise ValueError("the loss is not exits")

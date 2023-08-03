@@ -18,7 +18,7 @@ class Metric:
         info = config['val']['metric']
         name = info["name"].lower()
         self.metric = {}
-        for key, param in info["param"]:
+        for key, param in info["param"].items():
             self.metric[key] = metric[name][key.lower()](**param)
 
     def __call__(self, *args, **kwargs):

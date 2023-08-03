@@ -37,7 +37,7 @@ class BaseDataSet(Dataset):
         path = osp.join(lmdb_path, 'meta_info.txt')
         assert osp.exists(path), f"the lmdb file named {path} is not exits"
         with open(path, 'r') as file:
-            keys = [line.strip().split('.')[0] for line in file.readlines()]
+            keys = [line.strip().split(".")[0].encode() for line in file.readlines()]
         return env, keys
 
     def get_lmdb_img(self, keys, index, env):

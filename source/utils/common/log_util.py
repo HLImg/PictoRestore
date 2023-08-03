@@ -24,8 +24,9 @@ class Logger:
         return self.logger
 
 class Recorder:
-    def __init__(self, config):
+    def __init__(self, config, main_flag):
         self.config = config
+        self.main_flag = main_flag
         self.action = config["global"]["action"]
         self.info = config["global"]["dir_record"]
         self.main_dir = self.info["main_dir"]
@@ -37,7 +38,7 @@ class Recorder:
         self.main_dir = os.path.join(self.main_dir, self._current_time())
         self._check_dir(self.main_dir)
         self.sub_dirs = {}
-        for key, name in self.info["sub_dir"]:
+        for key, name in self.info["sub_dir"].items():
             self.sub_dirs[key] = os.path.join(self.main_dir, name)
             self._check_dir(self.sub_dirs[key])
 
@@ -45,7 +46,7 @@ class Recorder:
 
 
     def __copy_file__(self):
-        if self.config[self.action]['resume']['state']:
+        if self.config[self.action]['resume']['state'] and self.main_flag:
             state_file = self.config[self.action]['resume']['ckpt']
             _, name = os.path.split(state_file)
             save_dir = self.sub_dirs["resume_ckpt"]
@@ -54,7 +55,7 @@ class Recorder:
 
     def _check_dir(self, *dirs):
         for dir in dirs:
-            if not os.path.exists(dir):
+            if not os.path.exists(dir) and self.main_flag:
                 os.mkdir(dir)
 
     def _current_time(self):

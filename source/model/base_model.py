@@ -40,8 +40,8 @@ class BaseModel:
         optimizer = self.step_optimizer(self.conf_train['optim']['optimizer']['name'],
                                         param=self.conf_train['optim']['optimizer']['param'],
                                         net_param=net_g.parameters())
-        scheduler = self.step_scheduler(self.conf_train['optim']['optimizer']['name'],
-                                       param=self.conf_train['optim']['optimizer']['param'],
+        scheduler = self.step_scheduler(self.conf_train['optim']['scheduler']['name'],
+                                       param=self.conf_train['optim']['scheduler']['param'],
                                        optimizer=optimizer)
 
         self.metric = Metric(config)()
@@ -55,7 +55,7 @@ class BaseModel:
         self.scheduler = self.accelerator.prepare(scheduler)
         # ======================================================= #
 
-        num_iter_per_epoch = math.ceil(len(dataset['train']) / self.bacth_per_gpu * self.num_gpu_per_node * self.num_nodes)
+        num_iter_per_epoch = math.ceil(len(dataset['train']) / (self.bacth_per_gpu * self.num_gpu_per_node * self.num_nodes))
         self.start_epoch = 0
         self.end_epoch = math.ceil(self.total_iter / num_iter_per_epoch)
 
@@ -78,10 +78,10 @@ class BaseModel:
             scheduler = optim.lr_scheduler.CosineAnnealingLR(**param)
         elif name.lower() == 'CosineAnnealingWarmRestarts'.lower():
             scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(**param)
-        elif name.lower() == ''.lower():
+        elif name.lower() == 'MultiStepLR'.lower():
             scheduler = optim.lr_scheduler.MultiStepLR(**param)
         else:
-            raise ValueError(f"optimizer named {name} is not exits")
+            raise ValueError(f"scheduler named {name} is not exits")
         return scheduler
 
     def __feed__(self, data):

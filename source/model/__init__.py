@@ -6,7 +6,7 @@
 
 
 from .denoise import *
-from common.standard import standardModel
+from .common.standard import standardModel
 
 models = {
     "denoise": {

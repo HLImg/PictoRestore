@@ -21,7 +21,7 @@ dataset:
       patch_size : ~
       scale : ~
       flip : False
-      rot: False
+      rotation: False
       read_mode : 'lmdb'
 
     test:
@@ -61,7 +61,7 @@ model :
 train:
   num_node : 1
   num_worker : 8
-  batch_per_gpu : 4
+  batch_per_gpu : 8
   num_gpu_per_node : 8
   save_freq : !!float 5e3
   total_iters : !!float 2e5
