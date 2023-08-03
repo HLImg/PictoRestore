@@ -48,11 +48,10 @@ def train(model, config, logger, main_flag):
                         best_psnr["iter"] = cur_iter
 
                     # 打印信息
-                    info = f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr']} \n"
+                    info = f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr'] : .6f} \n" + ' ' * 32
                     for key in res_metric.keys():
-                        info += f"cur_{key} : {res_metric[key] : .6f}"
-                    info += '\n' + f"Best-PSNR {best_psnr['psnr'] : .6f} @ iter {best_psnr['iter']}"
-
+                        info += f"{key} : {res_metric[key] : .6f}    "
+                    info += '\n' + ' ' * 32 + f"best psnr : {best_psnr['psnr'] : .6f} @ iter {best_psnr['iter']}"
                     logger.info(info)
 
             if cur_iter % model.save_freq == 0 and main_flag:
@@ -71,18 +70,13 @@ def main(config, args, accelerator):
     _, yaml_file = os.path.split(args.yaml)
     if main_flag:
         shutil.copy(args.yaml, os.path.join(recoder.main_dir, yaml_file))
+
+    accelerator.wait_for_everyone()
     logger = Logger(recoder.main_dir)()
 
     if main_flag:
         logger.info("start training")
 
-    accelerator.wait_for_everyone()
-
     model = Model(config, accelerator)()
 
     train(model, config, logger, main_flag)
-
-
-
-
-

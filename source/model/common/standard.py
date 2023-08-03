@@ -25,7 +25,7 @@ class standardModel(BaseModel):
     def __eval__(self, data):
         predicted = self.net_g(data['lq'])
         res = {}
-        for key, metric in self.metric:
+        for key, metric in self.metric.items():
             res[key] = metric(tensor2img(predicted),
                               tensor2img(data['hq']))
 
