@@ -1,0 +1,106 @@
+global:
+  seed : 10
+  task : "denoise"
+  action : 'train'
+  dir_record :
+    main_dir : /data/workspace
+    main_name : NAFNet
+    sub_dir:
+      runlog: runlog
+      save_ckpt: save_ckpt
+      resume_ckpt: resume_ckpt
+
+
+dataset:
+  task : 'denoise'
+  name : 'pair_data'
+  param:
+    train :
+      lq_path : ~
+      hq_path : ~
+      patch_size : ~
+      scale : ~
+      flip : False
+      rot: False
+      read_mode : 'lmdb'
+
+    test:
+      lq_path: ~
+      hq_path: ~
+      read_mode: 'lmdb'
+
+
+loss:
+  pixel :
+    name : 'psnr'
+    param :
+      loss_weight : 1.
+      reduction : mean
+
+
+net:
+  task : 'denoise'
+  net_g :
+    name : 'nafnet'
+    param:
+      in_ch : 3
+      num_feats : 32
+      mid_blk_nums : 12
+      enc_blk_nums : [2, 2, 4, 8]
+      dec_blk_nums : [2, 2, 2, 2]
+      blk_name : 'nafnet'
+      blk_params :
+        DW_Expand: 2
+        FFN_Expand: 2
+        drop_out_rate: 0.
+
+model :
+  task : 'denoise'
+  name :
+
+train:
+  num_node : 1
+  num_worker : 8
+  batch_per_gpu : 4
+  num_gpu_per_node : 8
+  save_freq : !!float 5e3
+  total_iters : !!float 2e5
+  init:
+    state : False
+    name: ~
+  resume:
+    state: False
+    mode: all
+    ckpt: ~
+  optim:
+    optimizer:
+      name : 'AdamW'
+      param :
+        lr : 1.e-3
+        weight_decay : 0.
+        betas : [0.9, 0.9]
+    scheduler:
+      name : 'CosineAnnealingLR'
+      param :
+        T_max : !!float 2e5
+        eta_min : 1.e-7
+
+
+
+val:
+  val_freq : !!float 2e3
+  metric:
+    name: image
+    param:
+      psnr:
+        crop_border: 0
+        input_order: 'HWC'
+        test_y_channel: False
+      ssim:
+        crop_border: 0
+        input_order: 'HWC'
+        test_y_channel: False
+
+
+
+

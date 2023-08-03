@@ -1,0 +1,9 @@
+.idea
+z_loca/debug.ipynb
+*/__pycache__
+*/*/__pycache__
+*/*/*/__pycache__
+*/*/*/*/__pycache__
+*/*/*/*/*/__pycache__
+z_local/*
+Experiment*
