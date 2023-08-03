@@ -48,3 +48,4 @@ export NCCL_IB_HCA=$(pushd /sys/class/infiniband/ > /dev/null; for i in mlx*_*; 
 
 - [ ] 保存模型参数
 - [ ] 恢复模型参数
+- [ ] 测试
