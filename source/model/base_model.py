@@ -11,6 +11,7 @@ from source.net import Network
 from source.metric import Metric
 from source.dataset import DataSet
 from torch.utils.data import DataLoader
+from source.utils.image.transpose import tensor2img
 
 
 class BaseModel:
@@ -31,6 +32,7 @@ class BaseModel:
         # 初始化dataset, network, criterion, optimiser, scheduler
         criterion = Loss(config)()
         dataset = DataSet(config)()
+        self.val_sum = dataset['test'].__len__()
         train_loader = DataLoader(dataset['train'],
                                   batch_size=self.bacth_per_gpu,
                                   shuffle=True,
@@ -85,8 +87,25 @@ class BaseModel:
         return scheduler
 
     def __feed__(self, data):
-        pass
+        self.optimizer.zero_grad()
+        predicted = self.net_g(data['lq'])
+        loss = self.criterion(predicted, data['hq'])
+        # ========================================= #
+        self.accelerator.backward(loss)
+        # ========================================= #
+        self.optimizer.step()
+        self.scheduler.step()
 
     def __eval__(self, data):
-        pass
+        predicted = self.net_g(data['lq'])
+        # ======================================== #
+        all_predicts, all_targets = self.accelerator.gather_for_metrics((predicted, data['hq']))
+        # ======================================== #
+        res = {}
+        for key, metric in self.metric.items():
+            for ii in range(all_predicts.shape[0]):
+                res[key] += metric(tensor2img(all_predicts[ii]),
+                                   tensor2img(all_targets[ii]))
+
+        return res
 

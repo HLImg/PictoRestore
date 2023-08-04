@@ -46,7 +46,7 @@ export NCCL_IB_HCA=$(pushd /sys/class/infiniband/ > /dev/null; for i in mlx*_*; 
 
 ## TODO List
 - [ ] 解决若干bug
-  - [ ] 训练时验证集得到的PSNR虚高，测试时不一致
+  - [ ] 训练时验证集得到的PSNR虚高，测试时不一致 （在验证时，没有对多卡的验证结果进行汇聚）
   - [ ] 设置随机种子后，实验结果无法复现，且有较大差异
     
 - [ ] 新增功能

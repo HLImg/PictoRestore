@@ -24,9 +24,12 @@ class standardModel(BaseModel):
 
     def __eval__(self, data):
         predicted = self.net_g(data['lq'])
+        # ======================================== #
+        all_predicts, all_targets = self.accelerator.gather_for_metrics((predicted, data['hq']))
+        # ======================================== #
         res = {}
         for key, metric in self.metric.items():
-            res[key] = metric(tensor2img(predicted),
-                              tensor2img(data['hq']))
-
+            for ii in range(all_predicts.shape[0]):
+                res[key] += metric(tensor2img(all_predicts[ii]),
+                                   tensor2img(all_targets[ii]))
         return res
