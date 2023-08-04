@@ -104,7 +104,7 @@ class BaseModel:
         res = {}
         for key, metric in self.metric.items():
             for ii in range(all_predicts.shape[0]):
-                res[key] += metric(tensor2img(all_predicts[ii]),
+                res[key] = res.get(key, 0.) + metric(tensor2img(all_predicts[ii]),
                                    tensor2img(all_targets[ii]))
 
         return res

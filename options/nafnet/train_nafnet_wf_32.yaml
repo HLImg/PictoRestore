@@ -3,7 +3,7 @@ global:
   task : "denoise"
   action : 'train'
   dir_record :
-    main_dir : /data/workspace
+    main_dir : ./exp
     main_name : NAFNet
     sub_dir:
       runlog: runlog
@@ -17,17 +17,17 @@ dataset:
   name : 'pair_data'
   param:
     train :
-      lq_path : ~
-      hq_path : ~
-      patch_size : ~
-      scale : ~
+      lq_path : /data/dataset/sidd/lmdb/train_noisy.lmdb
+      hq_path : /data/dataset/sidd/lmdb/train_gt.lmdb
+      patch_size : 256
+      scale : 1
       flip : False
       rotation: False
       read_mode : 'lmdb'
 
     test:
-      lq_path: ~
-      hq_path: ~
+      lq_path: /data/dataset/sidd/lmdb/val_noisy.lmdb
+      hq_path: /data/dataset/sidd/lmdb/val_gt.lmdb
       read_mode: 'lmdb'
 
 
@@ -57,7 +57,7 @@ net:
 
 model :
   task : 'denoise'
-  name :
+  name : 'standard'
 
 train:
   num_node : 1
@@ -68,7 +68,7 @@ train:
   total_iters : !!float 2e5
   init:
     state : False
-    name: ~
+    name : ~
   resume:
     state: False
     mode: all
@@ -86,8 +86,6 @@ train:
         T_max : !!float 2e5
         eta_min : 1.e-7
 
-
-
 val:
   val_freq : !!float 2e3
   metric:
@@ -101,7 +99,3 @@ val:
         crop_border: 0
         input_order: 'HWC'
         test_y_channel: False
-
-
-
-
