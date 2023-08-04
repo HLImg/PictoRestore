@@ -30,7 +30,7 @@ model = NAFNet(3, 32, mid_blk_nums=12,
                     })
 
 ckpt = torch.load(pretrained_model)
-model = model.load_state_dict(ckpt['net'])
+model.load_state_dict(ckpt['net'])
 model = model.cuda()
 
 psnr_1 = 0.0
