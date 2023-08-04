@@ -12,7 +12,7 @@ from source.model import Model
 from source.utils.common.log_util import Recorder, Logger
 
 
-def train(model, config, logger, main_flag):
+def train(model, recoder, logger, main_flag):
     val_sum = len(model.test_loader)
     cur_iter = 0
     best_psnr = {
@@ -53,10 +53,18 @@ def train(model, config, logger, main_flag):
                         info += f"{key} : {res_metric[key] : .6f}    "
                     info += '\n' + ' ' * 32 + f"best psnr : {best_psnr['psnr'] : .6f} @ iter {best_psnr['iter']}"
                     logger.info(info)
+                    # 保存
+                    net_warp = model.accelerator.unwrap_model(model.net_g)
+                    best_path = os.path.join(recoder.sub_dirs['best_ckpt'], f'best_iter_{cur_iter}.ckpt')
+                    torch.save({'net': net_warp.state_dict()}, best_path)
+
 
             if cur_iter % model.save_freq == 0 and main_flag:
                 # TODO : 保存模型参数
-                pass
+                net_warp = model.accelerator.unwrap_model(model.net_g)
+                save_path = os.path.join(recoder.sub_dirs['save_ckpt'], f'save_iter_{cur_iter}.ckpt')
+                torch.save({'net': net_warp.state_dict()}, save_path)
+
 
     if main_flag:
         logger.info("end training")
@@ -79,4 +87,4 @@ def main(config, args, accelerator):
 
     model = Model(config, accelerator)()
 
-    train(model, config, logger, main_flag)
+    train(model, recoder, logger, main_flag)

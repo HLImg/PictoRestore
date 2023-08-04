@@ -45,7 +45,11 @@ export NCCL_IB_HCA=$(pushd /sys/class/infiniband/ > /dev/null; for i in mlx*_*; 
 ```
 
 ## TODO List
-
-- [ ] 保存模型参数
-- [ ] 恢复模型参数
-- [ ] 测试
+- [ ] 解决若干bug
+  - [ ] 训练时验证集得到的PSNR虚高，测试时不一致
+  - [ ] 设置随机种子后，实验结果无法复现，且有较大差异
+    
+- [ ] 新增功能
+  - [ ] 保存模型参数
+  - [ ] 恢复模型参数
+  - [ ] 测试

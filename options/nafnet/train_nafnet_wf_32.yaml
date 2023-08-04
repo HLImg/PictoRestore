@@ -9,6 +9,7 @@ global:
       runlog: runlog
       save_ckpt: save_ckpt
       resume_ckpt: resume_ckpt
+      best_ckpt : best_ckpt
 
 
 dataset:
