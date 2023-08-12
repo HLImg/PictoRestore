@@ -6,3 +6,4 @@
 
 
 from .nafnet import *
+from .onafnet import *

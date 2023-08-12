@@ -28,8 +28,11 @@ def train(model, recoder, logger, main_flag):
             loop_train.set_description(
                 f"epoch [{epoch} / {model.end_epoch}]")
             loop_train.set_postfix(lr=model.optimizer.param_groups[0]['lr'])
+            
+            if cur_iter % model.print_freq == 0 and main_flag:
+                logger.info(f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr'] : .8f}, loss = {model.loss}")
 
-            if cur_iter % model.val_freq == 0:
+            if cur_iter % model.val_freq == 0 or cur_iter == 1000:
                 # 不进行分布式验证，在一个gpu上完成验证
                 model.net_g.eval()
                 res_metric = {}

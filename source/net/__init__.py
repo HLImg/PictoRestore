@@ -6,9 +6,12 @@
 
 from .denoise import *
 
+from .denoise import onafnet
+
 nets = {
     "denoise": {
-        "nafnet": NAFNet
+        "nafnet": NAFNet,
+        "onafnet": ONAFNet
     }
 }
 

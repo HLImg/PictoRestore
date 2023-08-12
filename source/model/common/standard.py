@@ -16,6 +16,7 @@ class standardModel(BaseModel):
         self.optimizer.zero_grad()
         predicted = self.net_g(data['lq'])
         loss = self.criterion(predicted, data['hq'])
+        self.loss = loss.item() 
         # ========================================= #
         self.accelerator.backward(loss)
         # ========================================= #

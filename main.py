@@ -9,8 +9,8 @@ import argparse
 import source.train as train
 
 # =============================================== #
-from accelerate import  Accelerator
-from accelerate.utils import  set_seed
+from accelerate import Accelerator
+from accelerate.utils import set_seed
 # =============================================== #
 
 parser = argparse.ArgumentParser()
@@ -19,10 +19,11 @@ args = parser.parse_args()
 
 config = yaml.safe_load(open(args.yaml))
 
-set_seed(seed=config['global']['seed'])
+
 
 # ============================================= #
 accelerator = Accelerator()
+set_seed(seed=config['global']['seed'], device_specific=True)
 accelerator.print(f"device {str(accelerator.device)} is used")
 # ============================================= #
 

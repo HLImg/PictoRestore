@@ -27,7 +27,10 @@ class BaseModel:
 
         self.val_freq = self.conf_val['val_freq']
         self.save_freq = self.conf_train['save_freq']
+        self.print_freq = self.conf_train['print_freq']
         self.total_iter = self.conf_train['total_iters']
+        
+        self.loss = 0
 
         # 初始化dataset, network, criterion, optimiser, scheduler
         criterion = Loss(config)()

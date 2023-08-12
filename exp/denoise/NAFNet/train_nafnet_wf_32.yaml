@@ -66,7 +66,7 @@ train:
   num_gpu_per_node : 8
   save_freq : !!float 5e3
   print_freq : 200
-  total_iters : !!float 4e5 
+  total_iters : !!float 4e5
   init:
     state : False
     name : ~
