@@ -7,6 +7,7 @@
 import yaml
 import argparse
 import source.train as train
+from source.model import Model
 
 # =============================================== #
 from accelerate import Accelerator
@@ -27,4 +28,6 @@ set_seed(seed=config['global']['seed'], device_specific=True)
 accelerator.print(f"device {str(accelerator.device)} is used")
 # ============================================= #
 
-train.main(config, args, accelerator)
+if __name__ == '__main__':
+    model = Model(config, accelerator)()
+    train.main(config, args, accelerator, model=model)

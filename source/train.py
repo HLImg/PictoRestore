@@ -8,7 +8,6 @@ import os
 import torch
 import shutil
 from tqdm import tqdm
-from source.model import Model
 from source.utils.common.log_util import Recorder, Logger
 
 
@@ -73,7 +72,7 @@ def train(model, recoder, logger, main_flag):
         logger.info("end training")
 
 
-def main(config, args, accelerator):
+def main(config, args, accelerator, model):
     mm = True if config['train']['num_node'] > 1 else False
     main_flag = (not mm and accelerator.is_local_main_process) or (mm and accelerator.is_main_process)
 
@@ -83,11 +82,11 @@ def main(config, args, accelerator):
         shutil.copy(args.yaml, os.path.join(recoder.main_dir, yaml_file))
 
     accelerator.wait_for_everyone()
-    logger = Logger(recoder.main_dir)()
 
     if main_flag:
+        logger = Logger(recoder.main_dir)()
         logger.info("start training")
-
-    model = Model(config, accelerator)()
+    else:
+        logger = None
 
     train(model, recoder, logger, main_flag)

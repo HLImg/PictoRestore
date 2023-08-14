@@ -27,7 +27,7 @@ use_cpu: false
 ```
 启动训练命令如下
 ```shell
-accelerate launch --config_file=resource/acc.yaml --machine_rank=0 --num_machines=1 main.py  --yaml options/nafnet/train_nafnet_wf_32.yaml
+accelerate launch --config_file=resource/acc_config/single_node.yaml --machine_rank=0 --num_machines=1 main.py  --yaml options/nafnet/train_nafnet_wf_32.yaml
 ```
 ### multi-machines-multi-gpus
 相同的配置文件，以2台机器为例（显卡数默认为8）
@@ -36,6 +36,11 @@ accelerate launch --config_file=resource/acc.yaml --machine_rank=0 --num_machine
 accelerate launch --config_file=config.yaml --machine_rank=0 --num_machines=2  main.py  --yaml options/nafnet.yaml
 # machine-id : 1
 accelerate launch --config_file=config.yaml --machine_rank=1 --num_machines=2  main.py  --yaml options/nafnet.yaml
+```
+如果多机训练时，在prepare(model)处休眠，可以执行下面代码
+```shell
+export NCCL_SOCKET_IFNAME=eth0 # 根据自己的网卡设置
+export NCCL_IB_DISABLE=1
 ```
 如果多机启动时出现，*nccl error*，在训练之前，执行下面代码
 ```shell

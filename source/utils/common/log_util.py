@@ -5,6 +5,7 @@
 # @Email   :   lianghao@whu.edu.cn
 
 import os
+import time
 import shutil
 import logging
 import datetime
@@ -13,6 +14,8 @@ class Logger:
     def __init__(self, log_dir):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
+        while not os.path.exists(log_dir):
+            time.sleep(0.1)
         log_name = os.path.join(log_dir, 'logger.log')
         log_file = logging.FileHandler(filename=log_name, mode='a', encoding='utf-8')
         log_file.setFormatter(logging.DEBUG)
