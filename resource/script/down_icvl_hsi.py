@@ -14,7 +14,7 @@ from queue import Queue
 from bs4 import BeautifulSoup
 
 def download_file(url, path):
-    response = requests.get(url, stream=True)
+    response = requests.get(url, stream=True, timeout=10)
     total_size = int(response.headers.get('content-length', 0))
     
     with open(path, 'wb') as file:
@@ -47,6 +47,7 @@ def get_icvl_dataset(file_type='mat'):
 
 
 def worker(queue_obj, save_dir):
+    print(f"start downloading : {queue_obj.qsize()}")
     while not queue_obj.empty():
         url = queue_obj.get()
         path = os.path.join(save_dir, url[0])
@@ -57,7 +58,7 @@ def worker(queue_obj, save_dir):
 def main(file_type, save_dir):
     files = get_icvl_dataset(file_type)
     
-    num_threads = min(len(files), 8)
+    num_threads = min(len(files), 4)
     url_queue = Queue()
     
     for file in files:
@@ -66,7 +67,7 @@ def main(file_type, save_dir):
     for _ in range(num_threads):
         t = threading.Thread(target=worker, args=(url_queue, save_dir))
         t.daemon = True
-        t.start
+        t.start()
     url_queue.join()
 
 
