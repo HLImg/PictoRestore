@@ -4,10 +4,15 @@
 # @FileName:  down_icvl_hsi.py
 # @Contact :  lianghao02@megvii.com
 
-
 import os
+import h5py
+import glob
 import requests
 import threading
+
+import cv2 as cv
+import numpy as np
+
 
 from tqdm import tqdm
 from queue import Queue
@@ -70,9 +75,17 @@ def main(file_type, save_dir):
         t.start()
     url_queue.join()
 
+def load_hsi(path):
+    with h5py.File(path, 'r') as f:
+        keys = list(f.keys())
+        matfile_dict = {key: f[key][()] for key in keys}
+    return matfile_dict
+
+
+
 
 if __name__ == '__main__':
     file_type = '.mat'
     save_dir = '/home/Public/Train/denoise/HSI/ICVL'
     
-    main(file_type, save_dir)
+    # main(file_type, save_dir)
