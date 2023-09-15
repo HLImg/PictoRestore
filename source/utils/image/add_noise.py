@@ -36,7 +36,7 @@ class AddComplexNoise(AddMixedNoise):
 class AddNoise2HSI:
     def __init__(self, noise_type, clip=False):
         self.type = noise_type
-        if noise_type.lower() == 'dealine':
+        if noise_type.lower() == 'deadline':
             self.add_noise = AddDeadLineNoise()
 
         elif noise_type.lower() == 'stripe':
@@ -49,7 +49,7 @@ class AddNoise2HSI:
             self.add_nidd = AddMathNoise('niid-gaussian', clip=clip)
             self.add_complex = AddComplexNoise()
 
-        elif noise_type.lower() == 'impluse':
+        elif noise_type.lower() == 'impulse':
             self.add_noise = AddImpluseNoise()
 
         elif noise_type.lower() == 'niid-gaussian':
