@@ -4,7 +4,7 @@
 # @Author  : Hao Liang
 # @Email   : lianghao@whu.edu.cn
 
-from noise import *
+from .noise import *
 from torchvision.transforms import Compose
 
 class AddDeadLineNoise(AddMixedNoise):

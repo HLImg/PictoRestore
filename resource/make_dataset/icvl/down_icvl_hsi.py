@@ -17,6 +17,7 @@ import numpy as np
 from tqdm import tqdm
 from queue import Queue
 from bs4 import BeautifulSoup
+from scipy.io import loadmat
 
 def download_file(url, path):
     response = requests.get(url, stream=True, timeout=10)
@@ -75,11 +76,15 @@ def main(file_type, save_dir):
         t.start()
     url_queue.join()
 
-def load_hsi(path):
-    with h5py.File(path, 'r') as f:
-        keys = list(f.keys())
-        matfile_dict = {key: f[key][()] for key in keys}
-    return matfile_dict
+def load_hsi(path, is_h5py=False):
+    if is_h5py:
+        with h5py.File(path, 'r') as f:
+            keys = list(f.keys())
+            matfile_dict = {key: f[key][()] for key in keys}
+        return matfile_dict
+    else:
+        data = loadmat(path)
+        return data
 
 
 
