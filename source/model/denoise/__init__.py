@@ -4,3 +4,4 @@
 # @File    :   __init__.py
 # @Email   :   lianghao@whu.edu.cn
 
+from .hsi import hsiModel

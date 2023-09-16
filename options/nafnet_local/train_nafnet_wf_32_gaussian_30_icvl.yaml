@@ -4,7 +4,7 @@ global:
   action : 'train'
   dir_record :
     main_dir : ./exp
-    main_name : NAFNet
+    main_name : NAFNet-ICVL
     sub_dir:
       runlog: runlog
       save_ckpt: save_ckpt
@@ -17,7 +17,7 @@ dataset:
   name : 'syn_data'
   param:
     train :
-      hq_path : /data/dataset/hsi/icvl_train.lmdb
+      hq_path : /data/dataset/HSI/ICVL/icvl_train.lmdb
       patch_size : 64
       scale : 1
       flip : False
@@ -27,7 +27,7 @@ dataset:
       noise_type: "gaussian"
 
     test:
-      hq_path: /data/dataset/hsi/icvl_valid.lmdb
+      hq_path: /data/dataset/HSI/ICVL/icvl_valid.lmdb
       noise_level: 30
       noise_clip: False
       noise_type: "gaussian"
@@ -46,10 +46,10 @@ net:
   net_g :
     name : 'nafnet'
     param:
-      in_ch : 3
-      num_feats : 32
-      mid_blk_nums : 12
-      enc_blk_nums : [2, 2, 4, 8]
+      in_ch : 31
+      num_feats : 64
+      mid_blk_nums : 6
+      enc_blk_nums : [2, 2, 4, 4]
       dec_blk_nums : [2, 2, 2, 2]
       blk_name : 'nafnet'
       blk_params :
@@ -64,8 +64,8 @@ model :
 train:
   num_node : 1
   num_worker : 4
-  batch_per_gpu : 4
-  num_gpu_per_node : 8
+  batch_per_gpu : 8
+  num_gpu_per_node : 1
   save_freq : !!float 5e3
   print_freq : 200
   total_iters : !!float 4e5

@@ -10,7 +10,8 @@ from .common.standard import standardModel
 
 models = {
     "denoise": {
-        "standard": standardModel
+        "standard": standardModel,
+        "hsi" : hsiModel
     }
 }
 

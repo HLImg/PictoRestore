@@ -50,7 +50,6 @@ class ICVLDataset(BaseDataSet):
         return len(self.hq_keys)
 
     def norm_max_min(self, img):
-        img = np.float32(img)
         img_min, img_max = np.min(img), np.max(img)
         return (img - img_min) / (img_max - img_min)
 
@@ -76,8 +75,8 @@ class ICVLDataset(BaseDataSet):
             img_lq, img_hq = self.random_augment(img_lq, img_hq,
                                                  flip=self.flip, rot=self.rotation)
 
-        tensor_lq = img2tensor(img_lq)
-        tensor_hq = img2tensor(img_hq)
+        tensor_lq = img2tensor(np.float32(img_lq))
+        tensor_hq = img2tensor(np.float32(img_hq))
 
         return {'hq': tensor_hq, 'lq': tensor_lq}
 
