@@ -9,6 +9,8 @@ def select_dataset(name, param):
 
     if name.lower() == "pair_data":
         from source.dataset.common.pair_data import PairDataset as dataset
+    elif name.lower() == 'syn_data':
+        from source.dataset.denoise.hsi_syn import ICVLDataset as dataset
 
     else:
         raise ValueError(f"the name {name} is not exist in dataset-denoise")

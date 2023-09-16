@@ -9,8 +9,9 @@ from .image_metric import *
 metric = {
     "image": {
         "psnr": PSNR,
-        "ssim": SSIM
-    }
+        "ssim": SSIM,
+        "sam": SAM
+    },
 }
 
 class Metric:
