@@ -90,10 +90,10 @@ if __name__ == '__main__':
         'test': '/data/dataset/HSI/ICVL/icvl_test.lmdb'
     }
 
-    # train_paths = get_path(icvl_dir, meta_dir, 'train')
-    # crop_hsi_data(train_paths, save_dir='/data/dataset/HSI/ICVL/icvl_train', patch_size=256, stride=192)
-    # train_paths = [path for path in glob.glob('/data/dataset/HSI/ICVL/icvl_train/*.mat')]
-    # make_lmdb(train_paths, lmdb_path=dataset['train'], is_h5py=False)
+    train_paths = get_path(icvl_dir, meta_dir, 'train')
+    crop_hsi_data(train_paths, save_dir='/data/dataset/HSI/ICVL/icvl_train', patch_size=256, stride=192)
+    train_paths = [path for path in glob.glob('/data/dataset/HSI/ICVL/icvl_train/*.mat')]
+    make_lmdb(train_paths, lmdb_path=dataset['train'], is_h5py=False)
 
     valid_paths = get_path(icvl_dir, meta_dir, 'valid')
     crop_hsi_data(valid_paths, save_dir='/data/dataset/HSI/ICVL/icvl_valid', patch_size=512, stride=512)
