@@ -63,7 +63,7 @@ model :
 
 train:
   num_node : 1
-  num_worker : 4
+  num_worker : 8
   batch_per_gpu : 4
   num_gpu_per_node : 8
   save_freq : !!float 5e3
