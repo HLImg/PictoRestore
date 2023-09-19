@@ -4,7 +4,9 @@
 # @File    :   base_model.py
 # @Email   :   lianghao@whu.edu.cn
 
+import os
 import math
+import torch
 import torch.optim as optim
 from source.loss import Loss
 from source.net import Network
@@ -18,6 +20,7 @@ class BaseModel:
     def __init__(self, config, accelerator):
         self.conf_train = config["train"]
         self.conf_val = config["val"]
+        self.resume_info = config['resume']
 
         self.accelerator = accelerator
 
@@ -50,6 +53,7 @@ class BaseModel:
                                        optimizer=optimizer)
 
         self.metric = Metric(config)()
+        
         # ======================================================= #
         # accelerator进行加速配置
         self.train_loader = self.accelerator.prepare(train_loader)
@@ -58,7 +62,16 @@ class BaseModel:
         self.criterion = self.accelerator.prepare(criterion)
         self.optimizer = self.accelerator.prepare(optimizer)
         self.scheduler = self.accelerator.prepare(scheduler)
+        
+        if self.resume_info['state']:
+            self.accelerator.load_state(self.resume_info['directory'])
+        
+        # register the optimizer, schulder et al
+        self.accelerator.register_for_checkpointing(self.optimizer)
+        self.accelerator.register_for_checkpointing(self.scheduler)
+        self.accelerator.register_for_checkpointing(self.net_g)
         # ======================================================= #
+        
 
         num_iter_per_epoch = math.ceil(len(dataset['train']) / (self.bacth_per_gpu * self.num_gpu_per_node * self.num_nodes))
         self.start_epoch = 0
@@ -111,4 +124,14 @@ class BaseModel:
                                    tensor2img(all_targets[ii]))
 
         return res
-
+    
+    def __resume_other__(self):
+        if self.resume_info['state']:
+            if self.resume_info.get('optim', False):
+                self.accelerator.load_state(self.resume_info['optim'])
+                
+    def save_train_states(self, path, cur_iter):
+        save_dir = os.path.join(path, f'save_iter_{cur_iter}')
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+        self.accelerator.save_state(save_dir)

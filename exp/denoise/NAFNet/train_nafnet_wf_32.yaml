@@ -8,6 +8,7 @@ global:
     sub_dir:
       runlog: runlog
       save_ckpt: save_ckpt
+      save_state : save_state
       resume_ckpt: resume_ckpt
       best_ckpt : best_ckpt
 
@@ -72,8 +73,7 @@ train:
     name : ~
   resume:
     state: False
-    mode: all
-    ckpt: ~
+    directory: ~
   optim:
     optimizer:
       name : 'AdamW'

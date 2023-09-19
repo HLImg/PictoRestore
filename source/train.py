@@ -48,6 +48,11 @@ def train(model, recoder, logger, main_flag):
                         if res_metric["psnr"] > best_psnr["psnr"]:
                             best_psnr["psnr"] = res_metric["psnr"]
                             best_psnr["iter"] = cur_iter
+                            
+                            # 保存
+                            net_warp = model.accelerator.unwrap_model(model.net_g)
+                            best_path = os.path.join(recoder.sub_dirs['best_ckpt'], f'best_iter_{cur_iter}.ckpt')
+                            torch.save({'net': net_warp.state_dict()}, best_path)
 
                         # 打印信息
                         info = f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr'] : .6f} \n" + ' ' * 32
@@ -55,10 +60,7 @@ def train(model, recoder, logger, main_flag):
                             info += f"{key} : {res_metric[key] : .6f}    "
                         info += '\n' + ' ' * 32 + f"best psnr : {best_psnr['psnr'] : .6f} @ iter {best_psnr['iter']}"
                         logger.info(info)
-                        # 保存
-                        net_warp = model.accelerator.unwrap_model(model.net_g)
-                        best_path = os.path.join(recoder.sub_dirs['best_ckpt'], f'best_iter_{cur_iter}.ckpt')
-                        torch.save({'net': net_warp.state_dict()}, best_path)
+                        
 
 
             if cur_iter % model.save_freq == 0 and main_flag:
@@ -66,6 +68,7 @@ def train(model, recoder, logger, main_flag):
                 net_warp = model.accelerator.unwrap_model(model.net_g)
                 save_path = os.path.join(recoder.sub_dirs['save_ckpt'], f'save_iter_{cur_iter}.ckpt')
                 torch.save({'net': net_warp.state_dict()}, save_path)
+                model.save_train_states(recoder.sub_dirs['save_state'], cur_iter)
 
 
     if main_flag:

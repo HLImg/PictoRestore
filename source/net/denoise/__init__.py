@@ -8,3 +8,4 @@
 from .nafnet import *
 from .onafnet import *
 from .swin_unet import *
+from .sst import *

@@ -11,7 +11,8 @@ nets = {
         "nafnet": NAFNet,
         "onafnet": ONAFNet,
         "swinunet": SwinUNet,
-        "swinunet_official": SwinUNetOfficial
+        "swinunet_official": SwinUNetOfficial,
+        "sst" : SST
     }
 }
 
