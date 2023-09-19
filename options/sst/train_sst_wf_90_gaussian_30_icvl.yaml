@@ -1,0 +1,105 @@
+global:
+  seed : 10
+  task : "denoise"
+  action : 'train'
+  dir_record :
+    main_dir : ./exp
+    main_name : SST-ICVL-wf-90
+    sub_dir:
+      runlog: runlog
+      save_ckpt: save_ckpt
+      resume_ckpt: resume_ckpt
+      best_ckpt : best_ckpt
+
+
+dataset:
+  task : 'denoise'
+  name : 'syn_data'
+  param:
+    train :
+      hq_path : /data/dataset/hsi/icvl_train.lmdb
+      patch_size : 64
+      scale : 1
+      flip : False
+      rotation: False
+      noise_level: 30
+      noise_clip: False
+      noise_type: "gaussian"
+
+    test:
+      hq_path: /data/dataset/hsi/icvl_valid.lmdb
+      noise_level: 30
+      noise_clip: False
+      noise_type: "gaussian"
+
+
+loss:
+  pixel :
+    name : 'mse'
+    param :
+      loss_weight : 1.
+      reduction : mean
+
+
+net:
+  task : 'denoise'
+  net_g :
+    name : 'sst'
+    param:
+      inp_channels: 31
+      dim: 90
+      window_size: 8
+      depths: [6,6,6,6,6,6]
+      num_heads: [ 6,6,6,6,6,6]
+      mlp_ratio: 2
+      qkv_bias: True
+      bias: False
+      drop_path_rate: 0.1
+
+model :
+  task : 'denoise'
+  name : 'hsi'
+
+train:
+  num_node : 1
+  num_worker : 8
+  batch_per_gpu : 4
+  num_gpu_per_node : 2
+  save_freq : !!float 5e3
+  print_freq : 200
+  total_iters : !!float 4e5
+  init:
+    state : False
+    name : ~
+  resume:
+    state: False
+    mode: all
+    ckpt: ~
+  optim:
+    optimizer:
+      name : 'AdamW'
+      param :
+        lr : 1.e-4
+        weight_decay : 1.e-4
+        betas : [0.9, 0.999]
+        eps: 1.e-8
+        
+    scheduler:
+      name : 'MultiStepLR'
+      param :
+        milestones: [1350000] # 单卡 迭代次数 x  (gpu个数)
+        gamma : 0.1
+
+val:
+  val_freq : !!float 2e3
+  metric:
+    name: image
+    param:
+      psnr:
+        crop_border: 0
+        input_order: 'HWC'
+        test_y_channel: False
+      ssim:
+        crop_border: 0
+        input_order: 'HWC'
+        test_y_channel: False
