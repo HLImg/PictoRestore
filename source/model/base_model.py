@@ -20,7 +20,7 @@ class BaseModel:
     def __init__(self, config, accelerator):
         self.conf_train = config["train"]
         self.conf_val = config["val"]
-        self.resume_info = config['resume']
+        self.resume_info = config["train"]['resume']
 
         self.accelerator = accelerator
 
