@@ -32,12 +32,15 @@ class HSITest:
         self.clip = self.config['clip']
         self.bands = self.config['bands']
         
+        if not os.path.exists(self.dir):
+            os.mkdir(self.dir)
+        
         if self.save:
             self.save_denoised = os.path.join(self.dir, 'denoised')
             self.save_noised = os.path.join(self.dir, 'noised')
             self.save_diff = os.path.join(self.dir, 'diff')
             
-            for path in [self.dir, self.save_denoised, self.save_noised, self.save_diff]:
+            for path in [self.save_denoised, self.save_noised, self.save_diff]:
                 if not os.path.exists(path):
                     os.mkdir(path)
             
@@ -81,7 +84,7 @@ class HSITest:
             psnr[name] = metric_res['psnr']
             ssim[name] = metric_res['ssim']
             
-            if self.save or self.show:
+            if self.save or self.is_show:
                 gt_rgb = self.hsi2rgb(data['hq'])
                 noised_rgb = self.hsi2rgb(data['lq'])
                 denoised_rgb = self.hsi2rgb(predict)
@@ -97,7 +100,7 @@ class HSITest:
         total_psnr, total_ssim = 0.0, 0.0
         with open(os.path.join(self.dir, 'res.txt'), 'w') as file:
             for name in psnr.keys():
-                file.write(f'{name}' + ' ' * 4 + f'psnr : {psnr[name] : .4f}' + ' ' * 4 + f'ssim : {ssim[name] : .4f} \n')
+                file.write('{:<40}'.format(name) + ' ' * 4 + f'{psnr[name] : .4f} dB ' + ' ' * 4 + f'{ssim[name] : .4f} \n')
                 total_psnr += psnr[name]
                 total_ssim += ssim[name]
             
