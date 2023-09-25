@@ -12,7 +12,8 @@ nets = {
         "onafnet": ONAFNet,
         "swinunet": SwinUNet,
         "swinunet_official": SwinUNetOfficial,
-        "sst" : SST
+        "sst" : SST,
+        'tcnet': TCNet
     }
 }
 

@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from timm.models.layers import DropPath
+from .non_local import NonLocalAttention
 from einops.layers.torch import Rearrange
 from source.net.basic_module.utils import LayerNorm2d
 from source.net.basic_module.transformer.swin_transformer_simple import WMSA
@@ -96,3 +97,29 @@ class ResSwinTCBlock(nn.Module):
         x = x + self.conv_end(torch.cat([x_conv, x_trans], dim=1))
 
         return x
+
+
+class NonLocalTransformer(nn.Module):
+    def __init__(self, in_ch, expand_embed, expand_mlp, ksizes, act_name, bias, group, score_funtion='concat', drop_path=0.0) -> None:
+        super(NonLocalTransformer, self).__init__()
+        
+        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+        
+        self.ln_1 = LayerNorm2d(in_ch)
+        self.sa = NonLocalAttention(in_ch, expand_dim=expand_embed, ksizes=ksizes, 
+                                            act_name=act_name, bias=bias, group=group, score_funtion=score_funtion)
+        self.ln_2 = LayerNorm2d(in_ch)
+        self.mlp = nn.Sequential(
+            nn.Conv2d(in_ch, in_ch * expand_mlp, 1, 1, 0),
+            nn.GELU(),
+            nn.Conv2d(in_ch * expand_mlp, in_ch * expand_mlp, 3, 1, 1, groups=in_ch * expand_mlp),
+            nn.GELU(),
+            nn.Conv2d(in_ch * expand_mlp, in_ch, 1, 1, 0)
+        )
+    
+    def forward(self, x):
+        x = x + self.drop_path(self.sa(self.ln_1(x)))
+        x = x + self.drop_path(self.mlp(self.ln_2(x)))
+        return x
+        
+        

@@ -9,6 +9,7 @@ import torch.nn as nn
 
 from source.net.backbone.unet_arch import UNet
 from .net_utils import LayerNorm2d
+from source.net.denoise.swinconv import NonLocalTransformer, ResSwinTCBlock
 
 
 class NAFNet(UNet):
@@ -19,6 +20,12 @@ class NAFNet(UNet):
     def __block__(self, blk_name):
         if blk_name.lower() == "nafnet":
             return NAFBlock
+        elif blk_name.lower() == 'tcnet':
+            return ResSwinTCBlock
+        elif blk_name.lower() == 'nonlocal':
+            return NonLocalTransformer
+        else:
+            raise "the blk_name is not exist"
 
 
 class SimpleGate(nn.Module):

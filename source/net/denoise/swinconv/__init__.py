@@ -5,8 +5,8 @@
 # @Contact :  lianghao02@megvii.com
 
 import torch
-from .arch_utils import ResSwinTCBlock
 from source.net.backbone.rir_arch import RIR
+from .arch_utils import ResSwinTCBlock, NonLocalTransformer
 
 
 class TCNet(RIR):
@@ -17,6 +17,10 @@ class TCNet(RIR):
         if blk_name.lower() == 'tcnet':
             print(blk_name)
             return ResSwinTCBlock
+        elif blk_name.lower() == 'nonlocal':
+            return NonLocalTransformer
+        else:
+            raise "blk_name is not exist"
 
 
 if __name__ == '__main__':
