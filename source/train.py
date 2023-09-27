@@ -8,6 +8,7 @@ import os
 import torch
 import shutil
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 from source.utils.common.log_util import Recorder, Logger
 
 
@@ -18,6 +19,12 @@ def train(model, recoder, logger, main_flag):
         "iter": 0,
         "psnr": 0
     }
+    if main_flag:
+        if not recoder.sub_dirs.get('runlog', False):
+            writer = None
+        else:
+            writer = SummaryWriter(recoder.sub_dirs['config'])
+            
     for epoch in range(model.start_epoch, model.end_epoch):
         loop_train = tqdm(model.train_loader, desc='training', disable=not model.accelerator.is_local_main_process)
         model.net_g.train()
@@ -29,6 +36,8 @@ def train(model, recoder, logger, main_flag):
             loop_train.set_postfix(lr=model.optimizer.param_groups[0]['lr'])
             
             if cur_iter % model.print_freq == 0 and main_flag:
+                if writer:
+                    writer.add_scalar('data/train', model.loss, cur_iter)
                 logger.info(f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr'] : .8f}, loss = {model.loss}")
 
             if cur_iter % model.val_freq == 0 or cur_iter == 1000:
@@ -55,6 +64,9 @@ def train(model, recoder, logger, main_flag):
                             torch.save({'net': net_warp.state_dict()}, best_path)
 
                         # 打印信息
+                        if writer:
+                            writer.add_scalar('data/val_psnr', res_metric['psnr'], cur_iter)
+                            
                         info = f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr'] : .6f} \n" + ' ' * 32
                         for key in res_metric.keys():
                             info += f"{key} : {res_metric[key] : .6f}    "
