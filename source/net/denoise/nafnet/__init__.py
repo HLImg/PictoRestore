@@ -9,7 +9,7 @@ import torch.nn as nn
 
 from source.net.backbone.unet_arch import UNet
 from .net_utils import LayerNorm2d
-from source.net.denoise.swinconv import NonLocalTransformer, ResSwinTCBlock
+from source.net.denoise.swinconv.arch_utils import NonLocalTransformer, ResSwinTCBlock
 
 
 class NAFNet(UNet):
