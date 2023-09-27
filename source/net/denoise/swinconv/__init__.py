@@ -6,6 +6,7 @@
 
 import torch
 from source.net.backbone.rir_arch import RIR
+from source.net.denoise.nafnet import NAFBlock
 from .arch_utils import ResSwinTCBlock, NonLocalTransformer
 
 
@@ -19,6 +20,8 @@ class TCNet(RIR):
             return ResSwinTCBlock
         elif blk_name.lower() == 'nonlocal':
             return NonLocalTransformer
+        elif blk_name.lower() == 'nafnet':
+            return NAFBlock
         else:
             raise "blk_name is not exist"
 
