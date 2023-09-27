@@ -23,7 +23,7 @@ def train(model, recoder, logger, main_flag):
         if not recoder.sub_dirs.get('runlog', False):
             writer = None
         else:
-            writer = SummaryWriter(recoder.sub_dirs['config'])
+            writer = SummaryWriter(recoder.sub_dirs['runlog'])
             
     for epoch in range(model.start_epoch, model.end_epoch):
         loop_train = tqdm(model.train_loader, desc='training', disable=not model.accelerator.is_local_main_process)
