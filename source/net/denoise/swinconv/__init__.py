@@ -6,7 +6,7 @@
 
 import torch
 from source.net.backbone.rir_arch import RIR
-from source.net.denoise.nafnet import NAFBlock
+from source.net.denoise.nafnet.net_utils import NAFBlock
 from .arch_utils import ResSwinTCBlock, NonLocalTransformer
 
 
