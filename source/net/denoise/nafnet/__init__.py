@@ -10,6 +10,7 @@ import torch.nn as nn
 from .net_utils import NAFBlock
 from source.net.backbone.unet_arch import UNet
 from source.net.denoise.swinconv.nonlocal_ca import NonLocalCA
+from source.net.denoise.spatial_ca.arch_blk import NonLocalCAV2
 from source.net.denoise.swinconv.arch_utils import NonLocalTransformer, ResSwinTCBlock
 
 
@@ -27,6 +28,7 @@ class NAFNet(UNet):
             return NonLocalTransformer
         elif blk_name.lower() == 'nonlocal_ca':
             return NonLocalCA
+        elif blk_name.lower() == 'nonlocal_ca_v2':
+            return NonLocalCAV2
         else:
             raise "the blk_name is not exist"
-

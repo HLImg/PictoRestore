@@ -9,6 +9,7 @@ from .nonlocal_ca import NonLocalCA
 from source.net.backbone.rir_arch import RIR
 from source.net.denoise.nafnet.net_utils import NAFBlock
 from .arch_utils import ResSwinTCBlock, NonLocalTransformer
+from source.net.denoise.spatial_ca.arch_blk import NonLocalCAV2
 
 
 class TCNet(RIR):
@@ -25,6 +26,8 @@ class TCNet(RIR):
             return NAFBlock
         elif blk_name.lower() == 'nonlocal_ca':
             return NonLocalCA
+        elif blk_name.lower() == 'nonlocal_ca_v2':
+            return NonLocalCAV2
         else:
             raise "blk_name is not exist"
 
