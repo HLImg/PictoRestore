@@ -20,7 +20,7 @@ class Gate(nn.Module):
 
 
 class SimpleGate(nn.Module):
-    def forwarf(self, x):
+    def forward(self, x):
         x1, x2 = x.chunk(2, dim=1)
         return x1 * x2
 
