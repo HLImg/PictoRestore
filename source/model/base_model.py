@@ -54,6 +54,11 @@ class BaseModel:
 
         self.metric = Metric(config)()
         
+        if self.resume_info['state'] and self.resume_info['mode'].lower() == 'net':
+            ckpt = torch.load(self.resume_info['model'], map_location=torch.device('cpu'))
+            self.net_g.load_state_dict(ckpt['net'])
+            
+        
         # ======================================================= #
         # accelerator进行加速配置
         self.train_loader = self.accelerator.prepare(train_loader)
@@ -64,7 +69,11 @@ class BaseModel:
         self.scheduler = self.accelerator.prepare(scheduler)
         
         if self.resume_info['state']:
-            self.accelerator.load_state(self.resume_info['directory'])
+            if self.resume_info['mode'].lower() == 'all':
+                self.accelerator.load_state(self.resume_info['ckpt'])
+            elif self.resume_info['mode'].lower() == 'other':
+                self.__resume_other__()
+            
         
         # register the optimizer, schulder et al
         self.accelerator.register_for_checkpointing(self.optimizer)
@@ -126,12 +135,10 @@ class BaseModel:
         return res
     
     def __resume_other__(self):
-        if self.resume_info['state']:
-            if self.resume_info.get('optim', False):
-                self.accelerator.load_state(self.resume_info['optim'])
+        if self.resume_info.get('optim', False):
+            self.accelerator.load_state(self.resume_info['optim'])
+        if self.resume_info.get('model', False):
+            self.accelerator.load_state(self.resume_info['model'])
                 
     def save_train_states(self, path, cur_iter):
-        save_dir = os.path.join(path, f'save_iter_{cur_iter}')
-        if not os.path.exists(save_dir):
-            os.mkdir(save_dir)
-        self.accelerator.save_state(save_dir)
+        self.accelerator.save_state()

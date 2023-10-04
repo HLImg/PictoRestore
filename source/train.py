@@ -77,9 +77,9 @@ def train(model, recoder, logger, main_flag):
 
             if cur_iter % model.save_freq == 0 and main_flag:
                 # TODO : 保存模型参数
-                net_warp = model.accelerator.unwrap_model(model.net_g)
-                save_path = os.path.join(recoder.sub_dirs['save_ckpt'], f'save_iter_{cur_iter}.ckpt')
-                torch.save({'net': net_warp.state_dict()}, save_path)
+                # net_warp = model.accelerator.unwrap_model(model.net_g)
+                # save_path = os.path.join(recoder.sub_dirs['save_ckpt'], f'save_iter_{cur_iter}.ckpt')
+                # torch.save({'net': net_warp.state_dict()}, save_path)
                 model.save_train_states(recoder.sub_dirs['save_state'], cur_iter)
 
 
@@ -97,6 +97,7 @@ def main(config, args, accelerator, model):
         shutil.copy(args.yaml, os.path.join(recoder.main_dir, yaml_file))
 
     accelerator.wait_for_everyone()
+    accelerator.project_dir = recoder.main_dir
 
     if main_flag:
         logger = Logger(recoder.main_dir)()
