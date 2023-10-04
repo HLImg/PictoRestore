@@ -97,7 +97,6 @@ def main(config, args, accelerator, model):
         shutil.copy(args.yaml, os.path.join(recoder.main_dir, yaml_file))
 
     accelerator.wait_for_everyone()
-    accelerator.project_dir = recoder.main_dir
 
     if main_flag:
         logger = Logger(recoder.main_dir)()
