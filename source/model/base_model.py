@@ -44,7 +44,12 @@ class BaseModel:
                                   shuffle=True,
                                   num_workers=self.conf_train['num_worker'])
         test_loader = DataLoader(dataset['test'], batch_size=1, shuffle=False, num_workers=0)
+        
         net_g = Network(config)()
+        if self.resume_info['state'] and self.resume_info['mode'].lower() == 'net':
+            ckpt = torch.load(self.resume_info['model'], map_location=torch.device('cpu'))
+            self.net_g.load_state_dict(ckpt['net'])
+            
         optimizer = self.step_optimizer(self.conf_train['optim']['optimizer']['name'],
                                         param=self.conf_train['optim']['optimizer']['param'],
                                         net_param=net_g.parameters())
@@ -53,11 +58,7 @@ class BaseModel:
                                        optimizer=optimizer)
 
         self.metric = Metric(config)()
-        
-        if self.resume_info['state'] and self.resume_info['mode'].lower() == 'net':
-            ckpt = torch.load(self.resume_info['model'], map_location=torch.device('cpu'))
-            self.net_g.load_state_dict(ckpt['net'])
-            
+    
         
         # ======================================================= #
         # accelerator进行加速配置

@@ -45,7 +45,7 @@ class Recorder:
             self.sub_dirs[key] = os.path.join(self.main_dir, name)
             self._check_dir(self.sub_dirs[key])
 
-        self.__copy_file__()
+        # self.__copy_file__()
 
 
     def __copy_file__(self):
