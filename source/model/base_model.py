@@ -69,8 +69,12 @@ class BaseModel:
         self.optimizer = self.accelerator.prepare(optimizer)
         self.scheduler = self.accelerator.prepare(scheduler)
         
+        self.cur_iter = 0
+        
         if self.resume_info['state']:
             if self.resume_info['mode'].lower() == 'all':
+                iter_ = int(self.resume_info['ckpt'].split('_')[-1])
+                self.cur_iter = iter_ + 1
                 self.accelerator.load_state(self.resume_info['ckpt'])
             elif self.resume_info['mode'].lower() == 'other':
                 self.__resume_other__()

@@ -14,7 +14,7 @@ from source.utils.common.log_util import Recorder, Logger
 
 def train(model, recoder, logger, main_flag):
     val_sum = model.val_sum
-    cur_iter = 0
+    cur_iter = model.cur_iter
     best_psnr = {
         "iter": 0,
         "psnr": 0
