@@ -18,7 +18,7 @@ class RIR(nn.Module):
                 ResidualGroup(num_feats, blk_nums=blk_num, blk=blk, blk_name=blk_name, blk_params=blk_params, bias=bias)
             )
         module_body.append(nn.Conv2d(num_feats, num_feats, kernel_size, 1, padding=kernel_size // 2, bias=bias))
-        module_tail = [nn.Conv2d(num_feats, in_ch, kernel_size, 1, 1, bias=False)]
+        module_tail = [nn.Conv2d(num_feats, in_ch, kernel_size, 1, 1, bias=True)]
         
         self.head = nn.Sequential(*module_head)
         self.body = nn.Sequential(*module_body)

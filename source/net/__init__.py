@@ -13,7 +13,9 @@ nets = {
         "swinunet": SwinUNet,
         "swinunet_official": SwinUNetOfficial,
         "sst" : SST,
-        'tcnet': TCNet
+        'tcnet': TCNet,
+        'scunet': SCUNet,
+        'rirscunet': RIRSCUNet
     }
 }
 

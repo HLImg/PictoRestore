@@ -10,3 +10,4 @@ from .onafnet import *
 from .swin_unet import *
 from .sst import *
 from .swinconv import *
+from .scunet import *
