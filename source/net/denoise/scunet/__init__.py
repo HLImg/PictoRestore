@@ -275,7 +275,7 @@ class ResidualGroup(nn.Module):
         self.body = nn.Sequential(*module_body)
     
     def forward(self, x):
-        return self.body + x
+        return self.body(x) + x
 
 class RIRSCUNet(nn.Module):
     def __init__(self, in_ch, conv_dim, trans_dim, num_groups, head_dim, window_size, drop_path, input_resolution=None):
