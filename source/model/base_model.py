@@ -74,7 +74,7 @@ class BaseModel:
         if self.resume_info['state']:
             if self.resume_info['mode'].lower() == 'all':
                 iter_ = int(self.resume_info['ckpt'].split('_')[-1])
-                self.cur_iter = iter_ + 1
+                self.cur_iter = iter_
                 self.accelerator.load_state(self.resume_info['ckpt'])
             elif self.resume_info['mode'].lower() == 'other':
                 self.__resume_other__()
