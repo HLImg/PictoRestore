@@ -141,4 +141,7 @@ class BaseModel:
             self.accelerator.load_state(self.resume_info['model'])
                 
     def save_train_states(self, path, cur_iter):
-        self.accelerator.save_state()
+        save_dir = os.path.join(path, f'save_iter_{cur_iter}')
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+        self.accelerator.save_state(save_dir)
