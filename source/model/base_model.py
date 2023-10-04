@@ -34,6 +34,7 @@ class BaseModel:
         self.total_iter = self.conf_train['total_iters']
         
         self.loss = 0
+        self.cur_iter = 0
 
         # 初始化dataset, network, criterion, optimiser, scheduler
         criterion = Loss(config)()
@@ -47,6 +48,8 @@ class BaseModel:
         
         net_g = Network(config)()
         if self.resume_info['state'] and self.resume_info['mode'].lower() == 'net':
+            iter_ = int(self.resume_info['model'].split('.')[0].split('_')[-1])
+            self.cur_iter = iter_
             ckpt = torch.load(self.resume_info['model'], map_location=torch.device('cpu'))
             self.net_g.load_state_dict(ckpt['net'])
             
@@ -69,7 +72,7 @@ class BaseModel:
         self.optimizer = self.accelerator.prepare(optimizer)
         self.scheduler = self.accelerator.prepare(scheduler)
         
-        self.cur_iter = 0
+        
         
         if self.resume_info['state']:
             if self.resume_info['mode'].lower() == 'all':
