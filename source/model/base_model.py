@@ -88,7 +88,7 @@ class BaseModel:
         
 
         num_iter_per_epoch = math.ceil(len(dataset['train']) / (self.bacth_per_gpu * self.num_gpu_per_node * self.num_nodes))
-        self.start_epoch = 0
+        self.start_epoch = math.ceil(self.cur_iter / num_iter_per_epoch)
         self.end_epoch = math.ceil(self.total_iter / num_iter_per_epoch)
 
     def step_optimizer(self, name, param, net_param):
