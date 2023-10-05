@@ -31,7 +31,7 @@ class _Concatention(nn.Module):
         return x
 
 class NonLocalTransformer(nn.Module):
-    def __init__(self, num_feats, sa_expand, ffn_expand, ksizes, dropout_rate=0.0, group=True, act_name_sa='relu', act_name_mlp='relu', bias=True):
+    def __init__(self, num_feats, sa_expand, ffn_expand, ksizes, drop_rate=0.0, group=True, act_name_sa='relu', act_name_mlp='relu', bias=True):
         super(NonLocalTransformer, self).__init__()
         
         sa_feats = num_feats * sa_expand
@@ -46,8 +46,8 @@ class NonLocalTransformer(nn.Module):
         self.norm_1 = LayerNorm2d(num_feats)
         self.norm_2 = LayerNorm2d(num_feats)
         
-        self.dropout_1 = nn.Dropout(dropout_rate) if dropout_rate > 0. else nn.Identity()
-        self.dropout_2 = nn.Dropout(dropout_rate) if dropout_rate > 0. else nn.Identity()
+        self.dropout_1 = nn.Dropout(drop_rate) if drop_rate > 0. else nn.Identity()
+        self.dropout_2 = nn.Dropout(drop_rate) if drop_rate > 0. else nn.Identity()
         
         self.beta = nn.Parameter(torch.zeros(size=(1, num_feats, 1, 1)), requires_grad=True)
         self.gamma = nn.Parameter(torch.zeros(size=(1, num_feats, 1, 1)), requires_grad=True)

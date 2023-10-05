@@ -267,9 +267,10 @@ class ResidualGroup(nn.Module):
         
         module_body = [
             ConvTransBlock(conv_dim, trans_dim, head_dim, 
-                           window_size, drop_path, type='W' if not i%2 else 'SW', 
+                           window_size, drop_path[i], type='W' if not i%2 else 'SW', 
                            input_resolution=input_resolution) for i in range(num_blk)
         ]
+        
         module_body.append(nn.Conv2d(conv_dim + trans_dim, conv_dim + trans_dim, 3, 1, 1, bias=True))
         
         self.body = nn.Sequential(*module_body)
@@ -278,18 +279,21 @@ class ResidualGroup(nn.Module):
         return self.body(x) + x
 
 class RIRSCUNet(nn.Module):
-    def __init__(self, in_ch, conv_dim, trans_dim, num_groups, head_dim, window_size, drop_path, input_resolution=None):
+    def __init__(self, in_ch, conv_dim, trans_dim, num_groups, head_dim, window_size, drop_rate, input_resolution=None):
         super(RIRSCUNet, self).__init__()
         num_feats = conv_dim + trans_dim
         module_head = [nn.Conv2d(in_ch, num_feats, 3, 1, 1, bias=True)]
         module_body = []
         
-        for num_blk in num_groups:
+        drops = [x.item() for x in torch.linspace(0, drop_rate, sum(num_groups))]
+        
+        for i in range(len(num_groups)):
+            num_blk = num_groups[i]
             module_body.append(
-                ResidualGroup(num_blk, conv_dim, trans_dim, head_dim, window_size, drop_path, input_resolution)
+                ResidualGroup(num_blk, conv_dim, trans_dim, head_dim, window_size, drops[i : i + num_blk], input_resolution)
             )
         
-        module_body.append(nn.Conv2d(num_feats, num_feats, 3, 1, 1, bias=True))
+        self.conv_out = nn.Conv2d(num_feats, num_feats, 3, 1, 1, bias=True)
         module_tail = [nn.Conv2d(num_feats, in_ch, 3, 1, 1, bias=True)]
         
         self.head = nn.Sequential(*module_head)
@@ -298,8 +302,8 @@ class RIRSCUNet(nn.Module):
     
     def forward(self, x):
         head = self.head(x)
-        res = self.body(head) + head
-        res = self.tail(res) + x
+        res = self.body(head)
+        res = self.tail(self.conv_out(head + res)) + x
         return res
         
 

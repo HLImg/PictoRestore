@@ -7,7 +7,7 @@
 import torch.nn as nn
 
 from .arch_spatial import NonLocalTransformer
-from source.net.denoise.nafnet.net_utils import NAFBlock
+from source.net.denoise.rgb.nafnet import NAFBlock
 
 class NonLocalCAV2(nn.Module):
     def __init__(self, in_ch, sa_expand_sp, ffn_expand_sp, 

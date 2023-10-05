@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
-# @Author  :   Liang Hao 
-# @Time    :   2023/8/3 13:42
-# @File    :   net_utils.py
-# @Email   :   lianghao@whu.edu.cn
+# @Author  :  Liang Hao
+# @Time    :  2023/10/05 22:13:00
+# @FileName:  nafnet.py
+# @Contact :  lianghao@whu.edu.cn
 
 import torch
 import torch.nn as nn
@@ -53,7 +53,7 @@ class SimpleGate(nn.Module):
 
 
 class NAFBlock(nn.Module):
-    def __init__(self, c, DW_Expand=2, FFN_Expand=2, drop_out_rate=0.):
+    def __init__(self, c, DW_Expand=2, FFN_Expand=2, drop_rate=0.):
         super().__init__()
         dw_channel = c * DW_Expand
         self.conv1 = nn.Conv2d(in_channels=c, out_channels=dw_channel, kernel_size=1, padding=0, stride=1, groups=1,
@@ -83,8 +83,8 @@ class NAFBlock(nn.Module):
         self.norm1 = LayerNorm2d(c)
         self.norm2 = LayerNorm2d(c)
 
-        self.dropout1 = nn.Dropout(drop_out_rate) if drop_out_rate > 0. else nn.Identity()
-        self.dropout2 = nn.Dropout(drop_out_rate) if drop_out_rate > 0. else nn.Identity()
+        self.dropout1 = nn.Dropout(drop_rate) if drop_rate > 0. else nn.Identity()
+        self.dropout2 = nn.Dropout(drop_rate) if drop_rate > 0. else nn.Identity()
 
         self.beta = nn.Parameter(torch.zeros((1, c, 1, 1)), requires_grad=True)
         self.gamma = nn.Parameter(torch.zeros((1, c, 1, 1)), requires_grad=True)

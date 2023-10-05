@@ -5,9 +5,10 @@
 # @Email   :   lianghao@whu.edu.cn
 
 
-from .nafnet import *
-from .onafnet import *
+
 from .swin_unet import *
-from .sst import *
 from .swinconv import *
 from .scunet import *
+from .hsi import *
+from .rir_arch import *
+from .u_arch import *

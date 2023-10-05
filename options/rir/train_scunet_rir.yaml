@@ -1,0 +1,105 @@
+global:
+  seed : 2017
+  task : "denoise"
+  action : 'train'
+  dir_record :
+    main_dir : ./exp
+    main_name : RIR-SCUNET
+    sub_dir:
+      runlog: runlog
+      save_ckpt: save_ckpt
+      resume_ckpt: resume_ckpt
+      save_state: save_state
+      best_ckpt : best_ckpt
+
+
+dataset:
+  task : 'denoise'
+  name : 'sert_data'
+  param:
+    train :
+      hq_path : /data/dataset/hsi/ICVL64_31_train.db
+      patch_size : -1
+      scale : 1
+      flip : False
+      rotation: False
+      noise_level: 30
+      noise_clip: False
+      noise_type: "blind-gaussian"
+
+    test:
+      hq_path: /data/dataset/hsi/sert_test.lmdb
+      noise_level: 50
+      noise_clip: False
+      noise_type: "gaussian"
+
+
+loss:
+  pixel :
+    name : 'l1'
+    param :
+      loss_weight : 1.
+      reduction : mean
+
+
+net:
+  task : 'denoise'
+  net_g :
+    name : 'rirscunet'
+    param:
+      in_ch : 3
+      conv_dim: 32
+      trans_dim: 64
+      num_groups: [6, 6, 6, 6, 6, 6]
+      head_dim: 8
+      window_size: 32
+      drop_path: 0.1
+      input_resolution: 64
+
+model :
+  task : 'denoise'
+  name : 'hsi'
+
+train:
+  num_node : 1
+  num_worker : 8
+  batch_per_gpu : 4
+  num_gpu_per_node : 8
+  save_freq : !!float 5e3
+  print_freq : 200
+  total_iters : !!float 8e5
+  init:
+    state : False
+    name : ~
+  resume:
+    state: False
+    mode: all
+    ckpt: ~
+  optim:
+    optimizer:
+      name : 'AdamW'
+      param :
+        lr : 2.e-4
+        weight_decay : 0.
+        betas : [0.9, 0.99]
+    scheduler:
+      name : 'CosineAnnealingLR'
+      param :
+        T_max : 6400000 # 单卡 4e5 x 8 (gpu个数)
+        eta_min : 1.e-7
+
+val:
+  val_freq : !!float 2e3
+  metric:
+    name: image
+    param:
+      psnr:
+        crop_border: 0
+        input_order: 'HWC'
+        test_y_channel: False
+      ssim:
+        crop_border: 0
+        input_order: 'HWC'
+        test_y_channel: False
+      sam:
+        crop_border: 0
