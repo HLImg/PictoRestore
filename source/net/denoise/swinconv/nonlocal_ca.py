@@ -7,7 +7,7 @@
 import torch
 import torch.nn as nn
 from .arch_utils import NonLocalTransformer
-from source.net.denoise.nafnet.net_utils import NAFBlock
+from source.net.denoise.rgb.nafnet import NAFBlock
 
 class NonLocalCA(nn.Module):
     def __init__(self, in_ch, expand_embed, expand_mlp, ksizes, act_name, bias, group, score_funtion='concat', drop_path=0.0):
