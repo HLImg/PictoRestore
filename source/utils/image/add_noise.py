@@ -36,6 +36,7 @@ class AddComplexNoise(AddMixedNoise):
 class AddNoise2HSI:
     def __init__(self, noise_type, clip=False):
         self.type = noise_type
+        
         if noise_type.lower() == 'deadline':
             self.add_noise = AddDeadLineNoise()
 
@@ -65,7 +66,7 @@ class AddNoise2HSI:
             raise f"the noise type named { noise_type} is not exits in properties"
 
     def __call__(self, img, noise_level=10):
-        if self.type.lower() in ['gaussian', 'niid-gaussian']:
+        if self.type.lower() in ['gaussian', 'niid-gaussian', 'blind-gaussian']:
             return self.add_noise(img, noise_level)
         elif self.type.lower() == 'mixture':
             return self.add_complex(self.add_nidd(img, noise_level))

@@ -49,7 +49,7 @@ class AddBlindGaussianNoise(object):
 
     def __call__(self, img, noise_level=None):
         sigma = np.random.uniform(self.min_sigma, self.max_sigma) / 255.
-        noise = np.random.randint(*img.shape) * sigma
+        noise = np.random.randn(*img.shape) * sigma
         noised = img + noise
         if self.clip:
             noised = noised.clip(0, 1)
