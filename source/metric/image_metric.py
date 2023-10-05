@@ -5,8 +5,10 @@
 # @Email   :   lianghao@whu.edu.cn
 # @Thanks  :   BasicSR
 
+import imgvision as iv
 from .remote import *
 from .psnr_ssim import *
+
 
 
 class PSNR:
@@ -16,10 +18,8 @@ class PSNR:
         self.test_y_channel = test_y_channel
 
     def __call__(self, im1, im2):
-        return calculate_psnr(im1, im2,
-                              self.crop_border,
-                              input_order=self.input_order,
-                              test_y_channel=self.test_y_channel)
+        metric = iv.spectra_metric(im1, im2)
+        return metric.PSNR()
 
 
 class SSIM:
@@ -29,11 +29,8 @@ class SSIM:
         self.test_y_channel = test_y_channel
 
     def __call__(self, im1, im2):
-        return calculate_ssim(im1, im2,
-                              self.crop_border,
-                              input_order=self.input_order,
-                              test_y_channel=self.test_y_channel)
-
+        metric = iv.spectra_metric(im1, im2)
+        return metric.SSIM()
 
 class SAM:
     def __init__(self, crop_border=0, epsilon=1e-8):
@@ -41,4 +38,5 @@ class SAM:
         self.crop_border = crop_border
 
     def __call__(self, im1, im2):
-        return cal_sam_torch(im1, im2, eps=self.epsilon)
+        metric = iv.spectra_metric(im1, im2)
+        return metric.SAM()

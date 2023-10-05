@@ -65,7 +65,8 @@ def train(model, recoder, logger, main_flag):
 
                         # 打印信息
                         if writer:
-                            writer.add_scalar('data/val_psnr', res_metric['psnr'], cur_iter)
+                            for key in res_metric.keys():
+                                writer.add_scalar(f'data/val_{key}', res_metric[key], cur_iter)
                             
                         info = f"epoch : {epoch}, cur_lr : {model.optimizer.param_groups[0]['lr'] : .6f} \n" + ' ' * 32
                         for key in res_metric.keys():
