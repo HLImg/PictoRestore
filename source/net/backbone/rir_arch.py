@@ -20,7 +20,7 @@ class RIR(nn.Module):
         module_body = []
         for i in range(len(num_group)):
             module_body.append(
-                ResidualGroup(num_feats, drop_rate=drops[i : i + num_group[i]], blk_nums=num_group[i], blk=blk, blk_name=blk_name, blk_params=blk_params, bias=bias)
+                ResidualGroup(num_feats, drop_rate=drops[i : i + num_group[i]], blk_nums=num_group[i], blk=blk, blk_params=blk_params)
             )
             
         self.conv_out = nn.Conv2d(num_feats, num_feats, kernel_size, 1, padding=kernel_size // 2, bias=bias)

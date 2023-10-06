@@ -46,7 +46,7 @@ net:
   net_g :
     name : 'rir'
     param:
-      in_ch : 3
+      in_ch : 31
       num_feats : 96
       kernel_size: 3
       num_group: [6, 6, 6, 6, 6, 6]
@@ -54,7 +54,7 @@ net:
       blk_params :
         DW_Expand: 2
         FFN_Expand: 2
-        drop_out_rate: 0.
+        drop_rate: 0.
 
 model :
   task : 'denoise'
