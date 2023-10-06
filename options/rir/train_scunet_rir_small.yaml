@@ -4,7 +4,7 @@ global:
   action : 'train'
   dir_record :
     main_dir : ./exp
-    main_name : RIR-SCUNET
+    main_name : RIR-SCUNET-small
     sub_dir:
       runlog: runlog
       save_ckpt: save_ckpt
@@ -47,12 +47,12 @@ net:
   net_g :
     name : 'rirscunet'
     param:
-      in_ch : 3
+      in_ch : 31
       conv_dim: 32
       trans_dim: 64
-      num_groups: [6, 6, 6, 6, 6, 6]
-      head_dim: 8
-      window_size: 32
+      num_groups: [6, 6, 6]
+      head_dim: 32
+      window_size: 8
       drop_rate: 0.1
       input_resolution: 64
 

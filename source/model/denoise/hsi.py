@@ -5,6 +5,7 @@
 # @Email   : lianghao@whu.edu.cn
 
 import torch
+import numpy as np
 from source.model.base_model import BaseModel
 from source.utils.image.transpose import tensor2img
 
@@ -31,8 +32,8 @@ class hsiModel(BaseModel):
         res = {}
         for key, metric in self.metric.items():
             for ii in range(all_predicts.shape[0]):
-                res[key] = res.get(key, 0.) + metric(tensor2img(all_predicts[ii], rgb2bgr=False),
-                                                     tensor2img(all_targets[ii], rgb2bgr=False))
+                res[key] = res.get(key, 0.) + metric(self.tensor2img(all_targets[ii]), 
+                                                     self.tensor2img(all_predicts[ii]))
         return res
 
     def tensor2hsi(self, tensor, min_max=(0, 1)):
@@ -41,3 +42,6 @@ class hsiModel(BaseModel):
         img_np = _tensor.numpy()
         img_np = img_np.transpose(1, 2, 0)
         return img_np
+    
+    def tensor2img(self, tensor):
+        return np.transpose(tensor.data.cpu().numpy().squeeze(), (1, 2, 0))
