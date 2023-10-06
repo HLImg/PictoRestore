@@ -10,7 +10,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from timm.models.layers import DropPath
-from .non_local import NonLocalAttention
 from einops.layers.torch import Rearrange
 from source.net.basic_module.utils import LayerNorm2d
 from source.net.basic_module.transformer.swin_transformer_simple import WMSA
