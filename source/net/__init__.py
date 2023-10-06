@@ -13,7 +13,8 @@ nets = {
         'unet': UnetDenoising,
         'scunet': SCUNet,
         'rirscunet': RIRSCUNet,
-        'rir': RIRDenoising
+        'rir': RIRDenoising,
+        'rirtcb': RIRTCB
     }
 }
 
