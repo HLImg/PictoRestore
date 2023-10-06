@@ -47,18 +47,18 @@ class EnhancedSpatialAttention(nn.Module):
 
 
 class ResSwinTCBlock(nn.Module):
-    def __init__(self, conv_dim, trans_dim, head_dim, window_size, drop_path, type_='W', input_resolution=None):
+    def __init__(self, conv_dim, trans_dim, head_dim, window_size, drop_path, type='W', input_resolution=None):
         super(ResSwinTCBlock, self).__init__()
         # assert sum(split_dim) == in_ch, f'split dim : {split_dim}, but sum_dim : {in_ch}'
         self.conv_dim, self.trans_dim = conv_dim, trans_dim
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         
         if input_resolution <= window_size:
-            type_ = 'W'
+            type = 'W'
         
         """window self-attention wth enhanced spatial attention"""
         self.ln_1 = LayerNorm2d(self.trans_dim)
-        self.msa = WMSA(self.trans_dim, self.trans_dim, head_dim, window_size, type=type_)
+        self.msa = WMSA(self.trans_dim, self.trans_dim, head_dim, window_size, type=type)
         self.ln_2 = LayerNorm2d(self.trans_dim)
         self.mlp = nn.Sequential(
             nn.Conv2d(self.trans_dim, self.trans_dim * 4, 1, 1, 0),
