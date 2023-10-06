@@ -46,7 +46,7 @@ class ResidualGroup(nn.Module):
         super(ResidualGroup, self).__init__()
         
         if 'drop_rate' in blk_params.keys():
-            blk_params['drop_out_rate'] = drop_rate
+            blk_params['drop_rate'] = drop_rate
             
         module_body = []
         
