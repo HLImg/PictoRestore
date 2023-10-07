@@ -14,7 +14,8 @@ nets = {
         'scunet': SCUNet,
         'rirscunet': RIRSCUNet,
         'rir': RIRDenoising,
-        'rirtcb': RIRTCB
+        'rirtcb': RIRTCB,
+        'rirclb': RIRCLBNet
     }
 }
 
