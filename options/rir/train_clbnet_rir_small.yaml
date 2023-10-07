@@ -4,7 +4,7 @@ global:
   action : 'train'
   dir_record :
     main_dir : ./exp
-    main_name : RIR-CLBNet-base
+    main_name : RIR-CLBNet-small
     sub_dir:
       runlog: runlog
       save_ckpt: save_ckpt
