@@ -179,7 +179,7 @@ class CATransBlock(nn.Module):
         self.conv_head = nn.Conv2d(conv_dim + trans_dim, conv_dim + trans_dim, 1, 1, 0, bias=True)
         
         self.nonlocal_block = NonLocalBlock(trans_dim, trans_dim, head_dim, 
-                                            window_size, drop_path=drop_trans, type=window_size, 
+                                            window_size, drop_path=drop_trans, type=win_type, 
                                             input_resolution=input_resolution, act_name=act_trans)
         
         self.local_block = LocalBlock(conv_dim, drop_path=drop_conv, 
