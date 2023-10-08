@@ -12,6 +12,7 @@ import numpy as np
 from .tcb import RIRTCB
 from thop import profile
 from .clb import RIRCLBNet
+from .scanet import RIRSCANet
 from einops import rearrange 
 from einops.layers.torch import Rearrange, Reduce
 from timm.models.layers import trunc_normal_, DropPath
