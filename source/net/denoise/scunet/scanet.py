@@ -159,7 +159,7 @@ class LocalBlock(nn.Module):
     
     def forward(self, x):
         x = x + self.drop_path(self.local_spatial(self.norm_1(x)))
-        x = x + self.drop_path(x * self.ch_attn(x))
+        x = x + self.drop_path(x * self.ch_attn(self.norm_2(x)))
         return x
     
 
