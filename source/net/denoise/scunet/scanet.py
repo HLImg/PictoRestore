@@ -240,10 +240,10 @@ class RIRSCANet(nn.Module):
         for i in range(len(num_groups)):
             num_blk = num_groups[i]
             module_body.append(
-                ResidualGroup(num_blk, conv_dim, drop_conv=drops_conv[i], 
+                ResidualGroup(num_blk, conv_dim, drop_conv=drops_conv[i : i + num_blk], 
                               act_conv=act_conv, ca_expand=ca_expand, is_group=is_group, 
                               is_bias=is_bias, trans_dim=trans_dim, head_dim=head_dim, 
-                              window_size=window_size, drop_trans=drops_trans[i],
+                              window_size=window_size, drop_trans=drops_trans[i : i + num_blk],
                               input_resolution=input_resolution, act_trans=act_trans)
             )
         
