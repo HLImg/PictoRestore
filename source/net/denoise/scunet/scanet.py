@@ -144,7 +144,7 @@ class LocalBlock(nn.Module):
         self.local_spatial = nn.Sequential(
             nn.Conv2d(conv_dim, conv_dim, 3, 1, 1, bias=is_bias, groups=conv_dim if is_group else 1),
             get_act_layer(act_name),
-            nn.Conv1d(conv_dim, conv_dim, 3, 1, 1, bias=is_bias, groups=conv_dim if is_group else 1)
+            nn.Conv2d(conv_dim, conv_dim, 3, 1, 1, bias=is_bias, groups=conv_dim if is_group else 1)
         )
         
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
