@@ -4,13 +4,6 @@
 # @FileName:  scanetv2.py
 # @Contact :  lianghao@whu.edu.cn
 
-# -*- encoding: utf-8 -*-
-# @Author  :  Liang Hao
-# @Time    :  2023/10/08 14:30:23
-# @FileName:  scanet.py
-# @Contact :  lianghao@whu.edu.cn
-
-
 import torch
 import numpy as np
 import torch.nn as nn
