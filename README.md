@@ -57,7 +57,7 @@ export NCCL_IB_HCA=$(pushd /sys/class/infiniband/ > /dev/null; for i in mlx*_*; 
     
 - [ ] 新增功能
   - [x] 保存模型参数
-  - [ ] 恢复训练
+  - [x] 恢复训练
   - [ ] 测试
   - [ ] 热训练（warmup training）
 
