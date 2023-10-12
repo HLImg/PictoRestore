@@ -4,7 +4,9 @@
 # @File    :   base_model.py
 # @Email   :   lianghao@whu.edu.cn
 
+import os
 import math
+import torch
 import torch.optim as optim
 from source.loss import Loss
 from source.net import Network
@@ -18,6 +20,7 @@ class BaseModel:
     def __init__(self, config, accelerator):
         self.conf_train = config["train"]
         self.conf_val = config["val"]
+        self.resume_info = config["train"]['resume']
 
         self.accelerator = accelerator
 
@@ -31,6 +34,7 @@ class BaseModel:
         self.total_iter = self.conf_train['total_iters']
         
         self.loss = 0
+        self.cur_iter = 0
 
         # 初始化dataset, network, criterion, optimiser, scheduler
         criterion = Loss(config)()
@@ -41,7 +45,14 @@ class BaseModel:
                                   shuffle=True,
                                   num_workers=self.conf_train['num_worker'])
         test_loader = DataLoader(dataset['test'], batch_size=1, shuffle=False, num_workers=0)
+        
         net_g = Network(config)()
+        if self.resume_info['state'] and self.resume_info['mode'].lower() == 'net':
+            iter_ = int(self.resume_info['model'].split('.')[0].split('_')[-1])
+            self.cur_iter = iter_
+            ckpt = torch.load(self.resume_info['model'], map_location=torch.device('cpu'))
+            self.net_g.load_state_dict(ckpt['net'])
+            
         optimizer = self.step_optimizer(self.conf_train['optim']['optimizer']['name'],
                                         param=self.conf_train['optim']['optimizer']['param'],
                                         net_param=net_g.parameters())
@@ -50,6 +61,8 @@ class BaseModel:
                                        optimizer=optimizer)
 
         self.metric = Metric(config)()
+    
+        
         # ======================================================= #
         # accelerator进行加速配置
         self.train_loader = self.accelerator.prepare(train_loader)
@@ -58,10 +71,27 @@ class BaseModel:
         self.criterion = self.accelerator.prepare(criterion)
         self.optimizer = self.accelerator.prepare(optimizer)
         self.scheduler = self.accelerator.prepare(scheduler)
+        
+        
+        
+        if self.resume_info['state']:
+            if self.resume_info['mode'].lower() == 'all':
+                iter_ = int(self.resume_info['ckpt'].split('_')[-1])
+                self.cur_iter = iter_
+                self.accelerator.load_state(self.resume_info['ckpt'])
+            elif self.resume_info['mode'].lower() == 'other':
+                self.__resume_other__()
+            
+        
+        # register the optimizer, schulder et al
+        self.accelerator.register_for_checkpointing(self.optimizer)
+        self.accelerator.register_for_checkpointing(self.scheduler)
+        self.accelerator.register_for_checkpointing(self.net_g)
         # ======================================================= #
+        
 
         num_iter_per_epoch = math.ceil(len(dataset['train']) / (self.bacth_per_gpu * self.num_gpu_per_node * self.num_nodes))
-        self.start_epoch = 0
+        self.start_epoch = math.ceil(self.cur_iter / num_iter_per_epoch)
         self.end_epoch = math.ceil(self.total_iter / num_iter_per_epoch)
 
     def step_optimizer(self, name, param, net_param):
@@ -111,4 +141,15 @@ class BaseModel:
                                    tensor2img(all_targets[ii]))
 
         return res
-
+    
+    def __resume_other__(self):
+        if self.resume_info.get('optim', False):
+            self.accelerator.load_state(self.resume_info['optim'])
+        if self.resume_info.get('model', False):
+            self.accelerator.load_state(self.resume_info['model'])
+                
+    def save_train_states(self, path, cur_iter):
+        save_dir = os.path.join(path, f'save_iter_{cur_iter}')
+        if not os.path.exists(save_dir):
+            os.mkdir(save_dir)
+        self.accelerator.save_state(save_dir)
