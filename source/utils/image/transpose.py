@@ -22,7 +22,7 @@ def img2tensor(img):
         img = img[np.newaxis, :]
     else:
         img =np.transpose(img, (2, 0, 1))
-    return torch.from_numpy(img)
+    return torch.from_numpy(img.copy())
 
 def tensor2img(tensor, rgb2bgr=True, out_type=np.uint8, min_max=(0, 1)):
     """Convert torch Tensors into image numpy arrays.
