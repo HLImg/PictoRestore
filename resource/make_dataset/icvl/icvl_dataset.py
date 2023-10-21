@@ -11,7 +11,7 @@ import cv2 as cv
 import numpy as np
 
 from tqdm import tqdm
-from scipy.io import savemat, loadmat
+from scipy.io import loadmat, savemat
 from down_icvl_hsi import load_hsi
 
 

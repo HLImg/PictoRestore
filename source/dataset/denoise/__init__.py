@@ -13,6 +13,8 @@ def select_dataset(name, param):
         from source.dataset.denoise.hsi_syn import ICVLDataset as dataset
     elif name.lower() == 'sert_data':
         from source.dataset.denoise.sert_syn import SERTDataset as dataset
+    elif name.lower() == 'sert_data_mix':
+        from source.dataset.denoise.sert_syn_new import SERTDataSetMix as dataset
     else:
         raise ValueError(f"the name {name} is not exist in dataset-denoise")
 
