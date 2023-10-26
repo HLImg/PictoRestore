@@ -66,8 +66,15 @@ def make_lmdb(paths, lmdb_dir, ratio, mode='train'):
             name, _ = os.path.splitext(file)
             
             data = load_tif(paths[i], ratio)
-            shape = data.shape
             image = np.transpose(data, (2, 0, 1))
+            if mode == 'test':
+                patch_size = 512
+                r = image.shape[1] // 2 - patch_size // 2
+                c = image.shape[2]//2 - patch_size // 2
+                image = image[:, r: r + patch_size, c: c + patch_size]
+            
+            shape = image.shape[::-1]
+                
             key = name.encode('ascii')
             txn.put(key, image.tobytes())
             meta_info.append(name + f" ({shape[0]},{shape[1]},{shape[2]})")
