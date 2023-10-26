@@ -108,7 +108,6 @@ class SERTDataSetMix(BaseDataSet):
         if self.patch_size > 0:
             img_lq, img_hq = self.random_img2patch(img_lq, 
                                                    img_hq)
-            print(img_lq.shape, img_hq.shape)
         
         if self.flip or self.rotation:
             img_lq, img_hq = self.random_augment(img_lq, img_hq, flip=self.flip, rot=self.rotation)
