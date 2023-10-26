@@ -94,14 +94,26 @@ class SERTDataSetMix(BaseDataSet):
     def __len__(self):
         return len(self.hq_keys)
     
+    def chw2hwc(self, x):
+        return np.transpose(x, (1, 2, 0))
+    
+    def hwc2chw(self, x):
+        return np.transpose(x, (2, 0, 1))
+    
     def __getitem__(self, item):
+        # c h w
         img_lq, img_hq = self.get_lmdb_img(item)
+        img_lq, img_hq = self.chw2hwc(img_lq), self.chw2hwc(img_hq)
         
         if self.patch_size > 0:
-            img_lq, img_hq = self.random_img2patch(img_lq, img_hq)
+            img_lq, img_hq = self.random_img2patch(img_lq, 
+                                                   img_hq)
+            print(img_lq.shape, img_hq.shape)
         
         if self.flip or self.rotation:
             img_lq, img_hq = self.random_augment(img_lq, img_hq, flip=self.flip, rot=self.rotation)
+        
+        img_lq, img_hq = self.hwc2chw(img_lq), self.hwc2chw(img_hq)
         
         tensor_lq = torch.from_numpy(np.float32(img_lq.copy()))
         tensor_hq = torch.from_numpy(np.float32(img_hq.copy()))
