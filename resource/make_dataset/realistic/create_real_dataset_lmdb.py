@@ -90,8 +90,8 @@ def main(main_dir, meta_info, lmdb_dir):
     dirs = get_image_paths(main_dir, meta_info)
     
     # making train
-    make_lmdb(dirs['train']['input'], lmdb_dir, ratio=50., mode='train')
-    make_lmdb(dirs['train']['gt'], lmdb_dir, ratio=1., mode='train')
+    # make_lmdb(dirs['train']['input'], lmdb_dir, ratio=50., mode='train')
+    # make_lmdb(dirs['train']['gt'], lmdb_dir, ratio=1., mode='train')
     
     # making test
     make_lmdb(dirs['test']['input'], lmdb_dir, ratio=50., mode='test')
