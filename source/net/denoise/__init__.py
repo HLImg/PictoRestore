@@ -5,4 +5,4 @@
 # @Email   :   lianghao@whu.edu.cn
 
 
-from .nafnet import *
+from .nafnet import Nafnet

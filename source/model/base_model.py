@@ -51,7 +51,7 @@ class BaseModel:
             iter_ = int(self.resume_info['model'].split('.')[0].split('_')[-1])
             self.cur_iter = iter_
             ckpt = torch.load(self.resume_info['model'], map_location=torch.device('cpu'))
-            self.net_g.load_state_dict(ckpt['net'])
+            net_g.load_state_dict(ckpt['net'])
             
         optimizer = self.step_optimizer(self.conf_train['optim']['optimizer']['name'],
                                         param=self.conf_train['optim']['optimizer']['param'],

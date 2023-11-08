@@ -7,3 +7,7 @@ z_local/debug.ipynb
 */*/*/*/*/__pycache__
 z_local/*
 Experiment*
+debug.ipynb
+exp/*
+test.py
+syn_upload.sh

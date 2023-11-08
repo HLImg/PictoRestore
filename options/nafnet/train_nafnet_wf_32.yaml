@@ -102,23 +102,3 @@ val:
         crop_border: 0
         input_order: 'HWC'
         test_y_channel: False
-
-
-test:
-  dir: ~
-  ckpt: ~
-  is_save: True
-  is_show: False
-  is_cuda: True 
-  is_mat: True
-  bands: [0, 1, 2]
-  clip: True
-  dataset:
-    task : 'denoise'
-    name : 'syn_data'
-    param:
-      test:
-        hq_path: /data/dataset/hsi/icvl_valid.lmdb
-        noise_level: 30
-        noise_clip: False
-        noise_type: "gaussian"

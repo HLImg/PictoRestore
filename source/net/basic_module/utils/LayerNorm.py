@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
-# @Author  :   Liang Hao 
-# @Time    :   2023/8/3 13:42
-# @File    :   net_utils.py
-# @Email   :   lianghao@whu.edu.cn
+# @Author  :  Liang Hao
+# @Time    :  2023/09/23 11:35:57
+# @FileName:  LayerNorm.py
+# @Contact :  lianghao02@megvii.com
 
 import torch
 import torch.nn as nn
@@ -41,6 +41,3 @@ class LayerNorm2d(nn.Module):
         self.register_parameter('weight', nn.Parameter(torch.ones(channels)))
         self.register_parameter('bias', nn.Parameter(torch.zeros(channels)))
         self.eps = eps
-
-    def forward(self, x):
-        return LayerNormFunction.apply(x, self.weight, self.bias, self.eps)
