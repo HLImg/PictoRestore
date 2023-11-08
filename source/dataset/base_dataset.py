@@ -12,6 +12,7 @@ import numpy as np
 import os.path as osp
 from PIL import Image
 from torch.utils.data import Dataset
+
 class BaseDataSet(Dataset):
     def __init__(self, scale=1, patch_size=-1):
         """

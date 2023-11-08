@@ -8,17 +8,7 @@ from .denoise import *
 
 nets = {
     "denoise": {
-        "swinunet": SwinUNet,
-        "swinunet_official": SwinUNetOfficial,
-        'unet': UnetDenoising,
-        'scunet': SCUNet,
-        'rirscunet': RIRSCUNet,
-        'rir': RIRDenoising,
-        'rirtcb': RIRTCB,
-        'rirclb': RIRCLBNet,
-        'rirscanet': RIRSCANet,
-        'rirscanetv2': RIRSCANetv2,
-        'rirscanetv3': RIRSCANetv3
+        "nafnet": Nafnet,
     }
 }
 

@@ -9,7 +9,7 @@ import numpy as np
 from source.model.base_model import BaseModel
 from source.utils.image.transpose import tensor2img
 
-class hsiModel(BaseModel):
+class StandardModel(BaseModel):
     def __init__(self, config,  accelerator):
         super(hsiModel, self).__init__(config,  accelerator)
 

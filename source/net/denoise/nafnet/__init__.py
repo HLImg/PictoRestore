@@ -7,6 +7,18 @@
 import torch
 import torch.nn as nn
 
+from source.net.backbone.unet_arch import UNet
+from source.net.basic_module.utils.LayerNorm import LayerNorm2d
+
+class NAFNet(UNet):
+    def __init__(self, in_ch, num_feats, mid_blk_nums=1, enc_blk_nums=[], dec_blk_nums=[], blk_name=None,
+                 blk_params=None):
+        super(NAFNet, self).__init__(in_ch, num_feats, mid_blk_nums, enc_blk_nums, dec_blk_nums, blk_name, blk_params)
+
+    def __block__(self, blk_name):
+        if blk_name.lower() == "nafnet":
+            return NAFBlock
+
 class LayerNormFunction(torch.autograd.Function):
 
     @staticmethod
