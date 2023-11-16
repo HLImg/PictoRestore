@@ -8,7 +8,7 @@ from .denoise import *
 
 nets = {
     "denoise": {
-        "nafnet": Nafnet,
+        "nafnet": NAFNet,
     }
 }
 
