@@ -5,11 +5,9 @@
 # @Email   :   lianghao@whu.edu.cn
 # @Thanks  :   BasicSR
 
-import imgvision as iv
 from .remote import *
 from .psnr_ssim import *
-
-
+from source.utils.image.transpose import reorder_image, to_y_channel
 
 class PSNR:
     def __init__(self, crop_border=0, input_order='HWC', test_y_channel=False):
@@ -18,8 +16,10 @@ class PSNR:
         self.test_y_channel = test_y_channel
 
     def __call__(self, im1, im2):
-        metric = iv.spectra_metric(im1, im2)
-        return metric.PSNR()
+        return calculate_psnr(im1, im2,
+                              self.crop_border,
+                              input_order=self.input_order,
+                              test_y_channel=self.test_y_channel)
 
 
 class SSIM:
@@ -29,14 +29,7 @@ class SSIM:
         self.test_y_channel = test_y_channel
 
     def __call__(self, im1, im2):
-        metric = iv.spectra_metric(im1, im2)
-        return metric.SSIM()
-
-class SAM:
-    def __init__(self, crop_border=0, epsilon=1e-8):
-        self.epsilon = epsilon
-        self.crop_border = crop_border
-
-    def __call__(self, im1, im2):
-        metric = iv.spectra_metric(im1, im2)
-        return metric.SAM()
+        return calculate_ssim(im1, im2,
+                              self.crop_border,
+                              input_order=self.input_order,
+                              test_y_channel=self.test_y_channel)
