@@ -10,7 +10,6 @@ metric = {
     "image": {
         "psnr": PSNR,
         "ssim": SSIM,
-        "sam": SAM
     },
 }
 
