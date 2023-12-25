@@ -12,7 +12,7 @@ from torchvision.utils import make_grid
 
 
 class BasicObject:
-    def return_list(self, results: list):
+    def return_list(self, results: list) -> [list | object]:
         if len(results) == 1:
             return results[0]
         else:
@@ -34,7 +34,7 @@ class ToTensor(BasicObject):
     def __init__(self, inp_mode='hwc'):
         """
         convert image into tensor
-        :param inp_mode: the channel's mode of input images
+        :param inp_mode: the channel's mode of input images.
         """
         self.mode = inp_mode
 
@@ -65,11 +65,11 @@ class ToImage(BasicObject):
         """
         convert torch tensors into image.
         acceptable shapes of converted tensor are :
-            1) 4D mini-batch tensor of shape (batch_size, channels, height, width)
-            2) 3D tensor of shape (channels, height, width)
-            3) 2D tensor of shape (height, width)
+            1) 4D mini-batch tensor of shape (batch_size, channels, height, width).
+            2) 3D tensor of shape (channels, height, width).
+            3) 2D tensor of shape (height, width).
         :param out_type: transform the output to the specified Numpy data type.
-        :param min_max: min and max values for clamp
+        :param min_max: min and max values for clamp.
         """
         self.out_type = out_type
         self.min_max = min_max
