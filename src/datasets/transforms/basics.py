@@ -18,6 +18,20 @@ class BasicObject:
         else:
             return results
 
+    def uint8_to_single(self, image):
+        return np.float32(image / 255.)
+
+    def uint16_to_single(self, image):
+        return np.float32(image / 65535.)
+
+    def single2uint8(self, image):
+        return np.uint8((image.clip(0, 1) * 255.).round())
+
+    def single2uint16(self, image):
+        return np.uint16((image.clip(0, 1) * 65535.).round())
+
+
+
 
 class Compose(BasicObject):
     def __init__(self, transforms: list):
@@ -57,6 +71,24 @@ class ToNdarray(BasicObject):
         for tensor in tensors:
             tensor = tensor.float().detach().cpu()
             res.append(tensor)
+        return self.return_list(res)
+
+
+class ToUint8(BasicObject):
+    def __call__(self, *images):
+        res = []
+        for image in images:
+            image = self.single2uint8(image)
+            res.append(image)
+        return self.return_list(res)
+
+
+class ToUint16(BasicObject):
+    def __call__(self, *images):
+        res = []
+        for image in images:
+            image = self.single2uint16(image)
+            res.append(image)
         return self.return_list(res)
 
 

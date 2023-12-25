@@ -3,7 +3,8 @@
 # @File    : noise.py
 # @Author  : Hao Liang
 # @Email   : lianghao@whu.edu.cn
-
+import cv2
+import cv2 as cv
 import numpy as np
 
 from .basics import BasicObject
@@ -98,6 +99,31 @@ class NIIDGaussianNoise(BasicNoise):
         return self.return_list(res)
 
 
+class JPEGNoise(BasicObject):
+    def __init__(self, min_factor=30, max_factor=95):
+        """
+        Add JPEG compression noise to RGB images
+        :param min_factor: minimum quality factor., 30
+        :param max_factor: maximum quality factor, 95
+        """
+        self.min_factor = min_factor
+        self.max_factor = max_factor
+
+    def __call__(self, *images):
+        quality_factor = np.random.randint(self.min_factor,
+                                           self.max_factor)
+        res = []
+        for image in images:
+            image = cv.cvtColor(self.single2uint8(image), cv.COLOR_RGB2BGR)
+            result, encode_img = cv.imencode('.jpg', image,
+                                         [int(cv.IMWRITE_JPEG_QUALITY), quality_factor])
+            image = cv.imdecode(encode_img, 1)
+            image = cv.cvtColor(self.uint8_to_single(image), cv.COLOR_BGR2RGB)
+            res.append(image)
+
+        return self.return_list(res)
+
+
 class _BandWiseMixedNoise(BasicObject):
     def __init__(self, noise_makers: [], num_bands: []):
         """
@@ -149,15 +175,16 @@ class _DeadLineNoise(BasicObject):
 
 
 class DeadLineNoise(_BandWiseMixedNoise):
-    def __init__(self, min_amount: float, max_amount: float, num_bands: float | int):
+    def __init__(self, min_amount: float, max_amount: float, num_band: float | int):
         """
         Add Deadline noise to hyperspectral images.
         :param min_amount: 0.05
         :param max_amount: 0.15
         :param num_bands: 1 / 3
         """
+        num_bands = [num_band]
         noise_makers = [_DeadLineNoise(min_amount=min_amount, max_amount=max_amount)]
-        super().__init__(num_bands=[num_bands], noise_makers=noise_makers)
+        super().__init__(num_bands=num_bands, noise_makers=noise_makers)
 
 
 class _ImpulseNoise(BasicObject):
@@ -193,15 +220,16 @@ class _ImpulseNoise(BasicObject):
 
 
 class ImpulseNoise(_BandWiseMixedNoise):
-    def __init__(self, amount: list, s_vs_p=0.5, num_bands=1 / 3):
+    def __init__(self, amount: list, s_vs_p=0.5, num_band=1 / 3):
         """
         Add impulse noise to hyperspectral images.
         :param amount: [0.1, 0.3, 0.5, 0.7]
         :param s_vs_p: 0.5
         :param num_bands: 1/3
         """
+        num_bands = [num_band]
         noise_makers = [_ImpulseNoise(amount=amount, s_vs_p=s_vs_p)]
-        super().__init__(num_bands=[num_bands], noise_makers=noise_makers)
+        super().__init__(num_bands=num_bands, noise_makers=noise_makers)
 
 
 class _StripeNoise(BasicObject):
@@ -231,12 +259,35 @@ class _StripeNoise(BasicObject):
 
 
 class StripeNoise(_BandWiseMixedNoise):
-    def __init__(self, min_amount, max_amount, num_bands=1 / 3):
+    def __init__(self, min_amount, max_amount, num_band=1 / 3):
         """
         Add stripe noise to hyperspectral images
         :param min_amount: 0.05
         :param max_amount: 0.15
         :param num_bands: 1/3
         """
+        num_bands = [num_band]
         noise_makers = [_StripeNoise(min_amount=min_amount, max_amount=max_amount)]
-        super().__init__(num_bands=[num_bands], noise_makers=noise_makers)
+        super().__init__(num_bands=num_bands, noise_makers=noise_makers)
+
+
+class ComplexNoise(_BandWiseMixedNoise):
+    def __init__(self, stripe_params, deadline_params, impulse_params, num_bands: list):
+        """
+            Add complex noise including stripe, deadline and impulse
+            noise to hyperspectral images.
+        :param stripe_params: {}
+        :param deadline_params: {}
+        :param impulse_params: {}
+        :param num_bands: [1 / 3, 1 / 3, 1 / 3]
+        """
+        if num_bands is None:
+            num_bands = [1 / 3, 1 / 3, 1 / 3]
+        noise_makers = [
+            _StripeNoise(**stripe_params),
+            _DeadLineNoise(**deadline_params),
+            _ImpulseNoise(**impulse_params)
+        ]
+        
+        super().__init__(num_bands=num_bands, noise_makers=noise_makers)
+
