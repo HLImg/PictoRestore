@@ -3,6 +3,9 @@
 # @File    : noise.py
 # @Author  : Hao Liang
 # @Email   : lianghao@whu.edu.cn
+
+from __future__ import annotations
+
 import cv2
 import cv2 as cv
 import numpy as np
@@ -20,9 +23,9 @@ class BasicNoise(BasicObject):
         """
         np.random.seed(seed=seed)
         self.clip = clip
-        if isinstance(list, noise_range):
+        if isinstance(noise_range, list):
             self.noise_range = noise_range
-        elif isinstance(tuple, noise_range):
+        elif isinstance(noise_range, tuple):
             if len(noise_range) == 2:
                 self.noise_range = np.arange(
                     start=noise_range[0],
@@ -38,7 +41,7 @@ class BasicNoise(BasicObject):
             else:
                 raise TypeError(f"Only tuples of the form (start, end) or (start, end, step) \
                                 are supported, but received {noise_range}")
-        elif isinstance(int, noise_range) or isinstance(float, noise_range):
+        elif isinstance(noise_range, (int, float)):
             self.noise_range = [noise_range]
         else:
             raise TypeError(f"Only tuple, list, int or float are acceptable values, but received {noise_range}")
@@ -48,7 +51,7 @@ class BasicNoise(BasicObject):
 
 
 class IIDGaussianNoise(BasicNoise):
-    def __init__(self, clip, noise_range, seed):
+    def __init__(self, clip, noise_range, seed=42):
         super().__init__(clip, noise_range, seed)
 
     def __call__(self, *images):
@@ -61,11 +64,11 @@ class IIDGaussianNoise(BasicNoise):
                 image = image.clip(0, 1)
             res.append(image)
 
-        return self.return_list(res)
+        return res
 
 
 class PoissonNoise(BasicNoise):
-    def __init__(self, clip, noise_range, seed):
+    def __init__(self, clip, noise_range, seed=42):
         super().__init__(clip, noise_range, seed)
 
     def __call__(self, *images):
@@ -77,11 +80,11 @@ class PoissonNoise(BasicNoise):
                 image = image.clip(0, 1)
             res.append(image)
 
-        return self.return_list(res)
+        return res
 
 
 class NIIDGaussianNoise(BasicNoise):
-    def __init__(self, clip, noise_range, seed):
+    def __init__(self, clip, noise_range, seed=42):
         super().__init__(clip, noise_range, seed)
 
     def __call__(self, *images):
@@ -96,7 +99,7 @@ class NIIDGaussianNoise(BasicNoise):
                 image = image.clip(0, 1)
             res.append(image)
 
-        return self.return_list(res)
+        return res
 
 
 class JPEGNoise(BasicObject):
@@ -121,7 +124,7 @@ class JPEGNoise(BasicObject):
             image = cv.cvtColor(self.uint8_to_single(image), cv.COLOR_BGR2RGB)
             res.append(image)
 
-        return self.return_list(res)
+        return res
 
 
 class _BandWiseMixedNoise(BasicObject):
@@ -147,7 +150,7 @@ class _BandWiseMixedNoise(BasicObject):
             bands = all_bands[pos: pos + num_band]
             pos = pos + num_band
             res = noise_maker(res, bands=bands)
-        return self.return_list(res)
+        return res
 
 
 class _DeadLineNoise(BasicObject):

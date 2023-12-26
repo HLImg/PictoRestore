@@ -16,14 +16,20 @@ The referenced code are as follows:
 - [BasicSR](https://github.com/XPixelGroup/BasicSR)
 """
 
-from .basics import (Compose, ToImage, ToUint8, ToUint16, ToNdarray, ToTensor)
+from .basics import (Compose, ToImage, ToUint8, ToUint16, ToNdarray,
+                     ToTensor, CenterCrop, RandomCrop)
+
 from .noise import (NIIDGaussianNoise, IIDGaussianNoise, PoissonNoise,
                     JPEGNoise, ImpulseNoise, StripeNoise, DeadLineNoise,
                     ComplexNoise)
 
+from .augment import (Flip, FlipUD, FlipLR, RandomFlip, RandomRotation)
+
+from .downsample import (Resize, RandomResize)
+
 __all__ = [
     'Compose', 'ToImage', 'ToUint8', 'ToUint16', 'ToNdarray', 'ToTensor',
-    'NIIDGaussianNoise', 'IIDGaussianNoise', 'PoissonNoise', 'JPEGNoise',
-    'ImpulseNoise', 'StripeNoise', 'DeadLineNoise', 'ComplexNoise'
+    'CenterCrop', 'RandomCrop', 'NIIDGaussianNoise', 'IIDGaussianNoise',
+    'PoissonNoise', 'JPEGNoise', 'ImpulseNoise', 'StripeNoise', 'DeadLineNoise',
+    'ComplexNoise', 'Flip', 'FlipUD', 'FlipLR', 'RandomFlip', 'RandomRotation'
 ]
-
