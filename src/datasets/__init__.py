@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-# @Time    : 12/24/23 2:47 PM
-# @File    : __init__.py.py
-# @Author  : Hao Liang
-# @Email   : lianghao@whu.edu.cn
+# @Time : 2023/12/28
+# @Author : Liang Hao
+# @FileName : __init__
+# @Email : lianghao@whu.edu.cn
 
-from common import *
+from .common import *
+from .transforms import *
+from .image_denoising import *
+from .super_resolution import *
 
+from src.utils import DATASET_REGISTRY
 
-if __name__ == '__main__':
-    cf1 = dict(
-        hq_path='D:/TestDataSet/CBSD68/gt.lmdb',
-        down_scale=1,
-        patch_size=120,
-        aug_mode=None,
-        read_mode='lmdb'
-    )
+def get_dataset(config):
+    ret = {}
+    data_cfg = config['data']
+    for mode in data_cfg.keys():
+        ret[mode] = DATASET_REGISTRY.get_obj(
+            obj_name=data_cfg[mode]['name']
+        )(**data_cfg[mode]['param'])
 
-    # dataset = registy_dataset.get("common")(**cf1)
-    #
-    # print(len(dataset))
+    return ret
+
