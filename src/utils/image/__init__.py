@@ -3,3 +3,10 @@
 # @Author : Liang Hao
 # @FileName : __init__
 # @Email : lianghao@whu.edu.cn
+
+from .hyperspectral import (load_hsi_ICVL, load_hsi_Realistic)
+
+
+__all__ = [
+    'load_hsi_ICVL', 'load_hsi_Realistic'
+]

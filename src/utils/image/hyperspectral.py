@@ -4,16 +4,27 @@
 # @FileName : hyperspectral
 # @Email : lianghao@whu.edu.cn
 
+import h5py
 import numpy as np
 
 from scipy.io import loadmat
 from skimage.io import imread
 
 
-def load_hsi_icvl(path):
-    pass
+def load_hsi_ICVL(path):
+    """
+     "Sparse Recovery of Hyperspectral Signal from Natural RGB Images"
+     https://paperswithcode.com/dataset/icvl-hsi
+    :param path:
+    :return:
+    """
+    with h5py.File(path, 'r') as f:
+        keys = list(f.keys())
+        mat_data = {key: f[key][()] for key in keys}
+    return mat_data
 
-def load_hsi_realistic(path, ratio=1.):
+
+def load_hsi_Realistic(path, ratio=1.):
     """
     Hyperspectral Image Denoising with Realistic Data
     @InProceedings{Zhang_2021_ICCV,
