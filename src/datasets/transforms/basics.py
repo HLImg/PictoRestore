@@ -79,7 +79,7 @@ class ToTensor(BasicObject):
                     image = np.transpose(image, (2, 0, 1))
             res.append(torch.from_numpy(image))
 
-        return res
+        return self.return_list(res)
 
 
 class ToNdarray(BasicObject):
@@ -88,7 +88,7 @@ class ToNdarray(BasicObject):
         for tensor in tensors:
             tensor = tensor.float().detach().cpu()
             res.append(tensor)
-        return res
+        return self.return_list(res)
 
 
 class ToUint8(BasicObject):
@@ -97,7 +97,7 @@ class ToUint8(BasicObject):
         for image in images:
             image = self.single2uint8(image)
             res.append(image)
-        return res
+        return self.return_list(res)
 
 
 class ToUint16(BasicObject):
@@ -106,7 +106,7 @@ class ToUint16(BasicObject):
         for image in images:
             image = self.single2uint16(image)
             res.append(image)
-        return res
+        return self.return_list(res)
 
 
 class ToImage(BasicObject):
@@ -150,7 +150,7 @@ class ToImage(BasicObject):
 
             res.append(img_np)
 
-        return res
+        return self.return_list(res)
 
 
 class CenterCrop(BasicObject):
@@ -182,7 +182,7 @@ class CenterCrop(BasicObject):
 
             res.append(image[top: bottom, left: right])
 
-        return res
+        return self.return_list(res)
 
 
 class RandomCrop(BasicObject):
@@ -223,9 +223,14 @@ class RandomCrop(BasicObject):
             if h == max_h and w == max_w:
                 res.append(
                     images[i][ind_h * self.down_scale: (ind_h + self.shape[0]) * self.down_scale,
-                              ind_w * self.down_scale: (ind_w + self.shape[1]) * self.down_scale]
+                    ind_w * self.down_scale: (ind_w + self.shape[1]) * self.down_scale]
                 )
             else:
                 res.append(images[i][ind_h: ind_h + self.shape[1], ind_w: ind_w + self.shape[1]])
 
-        return res
+        return self.return_list(res)
+
+
+class ToIdentity(BasicObject):
+    def __call__(self, *images):
+        return self.return_list(images)

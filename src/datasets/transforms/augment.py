@@ -16,7 +16,7 @@ class Flip(BasicObject):
         for image in images:
             res.append(np.flip(image))
 
-        return res
+        return self.return_list(res)
 
 
 class FlipLR(BasicObject):
@@ -25,7 +25,7 @@ class FlipLR(BasicObject):
         for image in images:
             res.append(np.fliplr(image))
 
-        return res
+        return self.return_list(res)
 
 
 class FlipUD(BasicObject):
@@ -34,7 +34,7 @@ class FlipUD(BasicObject):
         for image in images:
             res.append(np.flipud(image))
 
-        return res
+        return self.return_list(res)
 
 
 class RandomRotation(BasicObject):
@@ -44,7 +44,7 @@ class RandomRotation(BasicObject):
         for image in images:
             res.append(np.rot90(image, k=k))
 
-        return res
+        return self.return_list(res)
 
 
 class RandomFlip(BasicObject):

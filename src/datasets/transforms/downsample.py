@@ -33,7 +33,7 @@ class Resize(BasicObject):
             w = int(image.shape[1] * self.scale)
             res.append(cv.resize(image, dsize=(w, h), interpolation=self.mode))
 
-        return res
+        return self.return_list(res)
 
 
 class RandomResize(BasicObject):
@@ -64,4 +64,4 @@ class RandomResize(BasicObject):
                 image = np.clip(image, 0.0, 1.0)
             res.append(image)
 
-        return res
+        return self.return_list(res)

@@ -64,7 +64,7 @@ class IIDGaussianNoise(BasicNoise):
                 image = image.clip(0, 1)
             res.append(image)
 
-        return res
+        return self.return_list(res)
 
 
 class PoissonNoise(BasicNoise):
@@ -80,7 +80,7 @@ class PoissonNoise(BasicNoise):
                 image = image.clip(0, 1)
             res.append(image)
 
-        return res
+        return self.return_list(res)
 
 
 class NIIDGaussianNoise(BasicNoise):
@@ -99,7 +99,7 @@ class NIIDGaussianNoise(BasicNoise):
                 image = image.clip(0, 1)
             res.append(image)
 
-        return res
+        return self.return_list(res)
 
 
 class JPEGNoise(BasicObject):
@@ -124,7 +124,7 @@ class JPEGNoise(BasicObject):
             image = cv.cvtColor(self.uint8_to_single(image), cv.COLOR_BGR2RGB)
             res.append(image)
 
-        return res
+        return self.return_list(res)
 
 
 class _BandWiseMixedNoise(BasicObject):
@@ -150,7 +150,7 @@ class _BandWiseMixedNoise(BasicObject):
             bands = all_bands[pos: pos + num_band]
             pos = pos + num_band
             res = noise_maker(res, bands=bands)
-        return res
+        return self.return_list(res)
 
 
 class _DeadLineNoise(BasicObject):
@@ -174,7 +174,7 @@ class _DeadLineNoise(BasicObject):
             loc = loc[:n]
             for j in range(num):
                 res[j][i, :, loc] = 0
-        return res
+        return self.return_list(res)
 
 
 class DeadLineNoise(_BandWiseMixedNoise):
@@ -212,14 +212,14 @@ class _ImpulseNoise(BasicObject):
             image[axis, ...][flipped & peppered] = 0
             res.append(image)
 
-        return res
+        return self.return_list(res)
 
     def __call__(self, *images, bands=None):
         res = [image.copy() for image in images]
         bw_amounts = self.amount[np.random.randint(0, len(self.amount), len(bands))]
         for i, amount in zip(bands, bw_amounts):
             res = self.add_noise(res, axis=i, amount=amount, salt_vs_pepper=self.s_vs_p)
-        return res
+        return self.return_list(res)
 
 
 class ImpulseNoise(_BandWiseMixedNoise):
@@ -258,7 +258,7 @@ class _StripeNoise(BasicObject):
             for j in range(num):
                 res[j][i, :, loc] -= np.reshape(stripe, (-1, 1))
 
-        return res
+        return self.return_list(res)
 
 
 class StripeNoise(_BandWiseMixedNoise):
