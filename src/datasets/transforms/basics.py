@@ -99,6 +99,22 @@ class ToUint8(BasicObject):
             res.append(image)
         return self.return_list(res)
 
+class Uint8ToSingle(BasicObject):
+    def __call__(self, *images):
+        res = []
+        for image in images:
+            image = self.uint8_to_single(image)
+            res.append(image)
+        return self.return_list(res)
+
+class Uint16ToSingle(BasicObject):
+    def __call__(self, *images):
+        res = []
+        for image in images:
+            image = self.uint16_to_single(image)
+            res.append(image)
+        return self.return_list(res)
+
 
 class ToUint16(BasicObject):
     def __call__(self, *images):
@@ -206,6 +222,8 @@ class RandomCrop(BasicObject):
         self.down_scale = down_scale
 
     def __call__(self, *images):
+        if self.shape[0] < 0:
+            return images
         n = len(images)
         max_h, max_w = images[0].shape[:2]
         if n > 1:
@@ -231,6 +249,6 @@ class RandomCrop(BasicObject):
         return self.return_list(res)
 
 
-class ToIdentity(BasicObject):
+class Identity(BasicObject):
     def __call__(self, *images):
         return self.return_list(images)

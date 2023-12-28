@@ -3,14 +3,15 @@
 # @Author : Liang Hao
 # @FileName : base_dataset
 # @Email : lianghao@whu.edu.cn
-import os
 
+import os
 import cv2
 import lmdb
 import glob
 import random
 import numpy as np
 import os.path as osp
+import src.datasets.transforms as transforms
 
 from PIL import Image
 from torch.utils.data import Dataset
@@ -42,20 +43,83 @@ class BaseDataSet(Dataset):
         │   ├── CC_40D_2_1103-0917.mat
         :returns (data=[(bulb_0822-0909.mat, "512_10"), ], num_class)
     """
+
+    def __init__(self,
+                 data_type=np.uint8,
+                 read_mode='disk',
+                 aug_mode=['flip', 'rot']):
+        if aug_mode == None:
+            self.augment = transforms.Identity()
+
+        if isinstance(aug_mode, (tuple, list)):
+            if len(aug_mode) == 0:
+                self.augment = transforms.Identity()
+            elif len(aug_mode) == 1:
+                aug_mode = aug_mode[0]
+            elif len(aug_mode) == 2:
+                self.augment = transforms.Compose(
+                    [
+                        transforms.RandomRotation(),
+                        transforms.RandomFlip(p=-1)
+                    ], p=0.5, k=1
+                )
+            else:
+                raise ValueError(f"Only support 'flip' and 'rot', but received {aug_mode}")
+
+        if isinstance(aug_mode, str):
+            if aug_mode.lower() == 'rot':
+                self.augment = transforms.RandomRotation()
+            elif aug_mode.lower() == 'flip':
+                self.augment = transforms.RandomFlip(p=-1)
+            else:
+                raise ValueError(f"Unknown augmentation {aug_mode}, and only support 'flip' and 'rot'")
+
+        self.read_mode = read_mode
+        self.data_type = data_type
+
+        if self.data_type == np.uint8:
+            self.trans2float32 = transforms.Uint8ToSingle()
+        elif self.data_type == np.uint16:
+            self.trans2float32 = transforms.Uint16ToSingle()
+        else:
+            raise ValueError(f"Unknown data type {data_type}, only support Uint8 and Uint16")
+
+
+
     def get_lmdb_info(self, lmdb_path):
+        """
+        Load lmdb to memory, including envs and infos
+        LMDB:
+        ├── data.mdb
+        ├── lock.mdb
+        └── meta_info.txt
+            ├── key1 (512, 512, 3)
+            ├── key2 (512, 512, 3)
+        :param lmdb_path: path of lmdb file
+        :returns (env, info=[[key1, shape, ...], [key2, shape, ...], ])
+        """
         env = lmdb.open(lmdb_path, readonly=True, lock=False, meminit=False)
         path = osp.join(lmdb_path, 'meta_info.txt')
         assert osp.exists(path), f"the lmdb path named {path} is not exist"
         info = []
         with open(path, 'r') as file:
             for line in file.readlines():
-                line = line.strip().split(' ')
-                line[0] = line[0].encode()
-                line[1] = eval(line[1])
-                info.append(line)
+                line = line.strip().split('-')
+                info.append({'key': line[0].encode(),
+                             'shape': eval(line[1])})
         return env, info
 
     def get_disk_info(self, root_dir):
+        """
+        test_gaussian
+        ├── 512_10
+        │   ├── bulb_0822-0909.mat
+        │   ├── CC_40D_2_1103-0917.mat
+        ├── 512_30
+        │   ├── bulb_0822-0909.mat
+        │   ├── CC_40D_2_1103-0917.mat
+        :returns (data=[(bulb_0822-0909.mat, "512_10"), ], num_class)
+        """
         image_extensions = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", '.mat'}
         data = []
         num_class = 0
@@ -74,13 +138,22 @@ class BaseDataSet(Dataset):
 
         return data, num_class
 
-    def get_disk_img(self, file_paths, item):
-        img_np = np.array(Image.open(file_paths[item]))
+    def get_disk_img(self, paths, item):
+        img_np = np.array(Image.open(paths[item][0]))
         return img_np
 
-    def get_lmdb_img(self, env, key, shape, dtype=np.float32):
-        with env.begin(write=False) as txn:
-            buf = txn.get(key)
-        img_np = np.frombuffer(buf, dtype=dtype)
-        img_np = img_np.reshape(shape)
+    def get_lmdb_img(self, envs, infos, item):
+        with envs.begin(write=False) as txn:
+            buf = txn.get(infos[item]['key'])
+        img_np = np.frombuffer(buf, dtype=self.data_type)
+        img_np = img_np.reshape(infos[item]['shape'])
         return img_np
+
+    def get_image(self, params):
+        if self.read_mode.lower() == 'lmdb':
+            image_np = self.get_lmdb_img(**params)
+        elif self.read_mode.lower() == 'disk':
+            image_np = self.get_disk_img(**params)
+        else:
+            raise ValueError(f"Unknown read mode: {self.read_mode}, Only support lmdb and disk")
+        return image_np
