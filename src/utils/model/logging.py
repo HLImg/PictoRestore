@@ -6,34 +6,95 @@
 
 import os
 import time
+import yaml
 import shutil
 import logging
-import datetime
 
+from datetime import datetime
 from accelerate.logging import get_logger
-from accelerate.tracking import on_main_process
+from accelerate.tracking import (on_main_process, GeneralTracker, listify)
 
 
-class Logger:
-    def __init__(self, root_dir):
+class Tracker(GeneralTracker):
+    name = "tensorboard"
+    requires_logging_directory = True
+    @on_main_process
+    def __init__(self, run_name, save_dir, verbose=False, **kwargs):
+        try:
+            from torch.utils import tensorboard
+        except ModuleNotFoundError:
+            import tensorboardX as tensorboard
+
+        super().__init__()
+
+        self.time_stamp = datetime.now().strftime("%Y%m%d_%H%M")
+        self.root_dir = os.path.join(save_dir, run_name)
+
+        if not os.path.exists(self.root_dir):
+            os.mkdir(self.root_dir)
+
         self.logger = get_logger(__name__)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
 
-        log_name = os.path.join(root_dir, 'logger.log')
+        log_name = os.path.join(self.root_dir, f'{self.time_stamp}.log')
         log_file = logging.FileHandler(filename=log_name, mode='a', encoding='utf-8')
         log_file.setLevel(logging.DEBUG)
-        log_terminal = logging.StreamHandler()
-        log_terminal.setLevel(logging.INFO)
         formatter = logging.Formatter(
-            '%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s'
+            '%(asctime)s - %(levelname)s: %(message)s'
         )
         log_file.setFormatter(formatter)
-        log_terminal.setFormatter(formatter)
+
+        if verbose:
+            log_terminal = logging.StreamHandler()
+            log_terminal.setLevel(logging.INFO)
+            log_terminal.setFormatter(formatter)
+            self.logger.addHandler(log_terminal)
         self.logger.addHandler(log_file)
-        self.logger.addHandler(log_terminal)
+
+        self.tracker_dir = os.path.join(self.root_dir, 'tracker')
+        self.writer = tensorboard.SummaryWriter(self.tracker_dir, **kwargs)
+
+    @property
+    def tracker(self):
+        return self.writer
 
     @on_main_process
-    def info(self, msg):
-        self.logger.info(msg)
+    def store_init_configuration(self, values: dict):
+        self.writer.add_hparams(values, metric_dict={})
+        self.writer.flush()
+
+        dir_name = os.path.join(self.tracker_dir, str(self.time_stamp))
+        os.makedirs(dir_name, exist_ok=True)
+
+        with open(os.path.join(dir_name, "hparams.yml"), 'w') as outfile:
+            try:
+                yaml.dump(values, outfile)
+            except yaml.representer.RepresenterError:
+                raise ValueError("yaml.representer.RepresenterError")
+
+    @on_main_process
+    def log(self, values, step, **kwargs):
+        values = listify(values)
+        for k, v in values.items():
+            if isinstance(v, (int, float)):
+                self.writer.add_scalar(k, v, global_step=step, **kwargs)
+            elif isinstance(v, str):
+                self.writer.add_text(k, v, global_step=step, **kwargs)
+            elif isinstance(v, dict):
+                self.writer.add_scalars(k, v, global_step=step, **kwargs)
+        self.writer.flush()
+
+    @on_main_process
+    def info(self, msg, **kwargs):
+        self.logger.info(msg, **kwargs)
+
+    @on_main_process
+    def log_images(self, values, step, **kwargs):
+        for k, v in values.items():
+            self.writer.add_images(k, v, global_step=step, **kwargs)
+
+    @on_main_process
+    def finish(self):
+        self.writer.close()
 
