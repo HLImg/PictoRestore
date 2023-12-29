@@ -1,21 +1,23 @@
 data:
-  train:
-    name: PairDataSet
-    param:
-      lq_path: ~
-      hq_path: ~
-      down_scale: 1
-      patch_size: 128
-      aug_mode: ['flip', 'rot']
-      read_mode: lmdb
-  test:
-    name: PairDataSet
-    param:
-      lq_path: ~
-      hq_path: ~
-      down_scale: 1
-      patch_size: -1
-      aug_mode: ~
-      read_mode: lmdb
+    train:
+        name: PairDataSet
+        param:
+            lq_path: ~
+            hq_path: ~
+            down_scale: 1
+            patch_size: 128
+            aug_mode: ['flip', 'rot']
+            read_mode: lmdb
+    test:
+        name: PairDataSet
+        param:
+            lq_path: ~
+            hq_path: ~
+            down_scale: 1
+            patch_size: -1
+            aug_mode: ~
+            read_mode: lmdb
+
+
 
 
