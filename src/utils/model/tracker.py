@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # @Time : 2023/12/28
 # @Author : Liang Hao
-# @FileName : logging
+# @FileName : tracker
 # @Email : lianghao@whu.edu.cn
-import colorlog
+
 import os
 import time
 import yaml
@@ -12,7 +12,6 @@ import logging
 import coloredlogs
 
 from datetime import datetime
-from colorlog import ColoredFormatter
 from accelerate.tracking import (on_main_process, GeneralTracker, listify)
 
 
@@ -39,58 +38,19 @@ class Tracker(GeneralTracker):
 
         log_name = os.path.join(self.root_dir, f'{self.time_stamp}.log')
 
-
-        stream_handler = colorlog.StreamHandler() if verbose else None
         file_handler = logging.FileHandler(filename=log_name, mode='a', encoding='utf-8')
 
+        fmt = '%(asctime)s %(hostname)s[%(process)d] %(levelname)s %(message)s'
+        if verbose:
+            coloredlogs.install(logger=self._logger, level=logging.INFO, fmt=fmt)
+
         self._logger.addHandler(file_handler)
-        if verbose:
-            self._logger.addHandler(stream_handler)
 
-        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+        formatter = logging.Formatter(fmt)
 
-        formatter_console = coloredlogs.ColoredFormatter(
-            fmt='%(asctime)s [%(levelname)s] %(message)s',
-            level_styles=dict(
-                debug=dict(color='white'),
-                info=dict(color='blue'),
-                warning=dict(color='yellow', bright=True),
-                error=dict(color='red', bold=True, bright=True),
-                critical=dict(color='black', bold=True, background='red'),
-            ),
-            field_styles=dict(
-                name=dict(color='yellow', bold=True),
-                asctime=dict(color='green', bold=True),
-                levelname=dict(color='red'),
-                lineno=dict(color='white'),
-            )
-        )
-
-        if verbose:
-            stream_handler.setFormatter(formatter_console)
         file_handler.setFormatter(formatter)
 
-        if verbose:
-            stream_handler.close()
         file_handler.close()
-
-
-
-
-        # log_name = os.path.join(self.root_dir, f'{self.time_stamp}.log')
-        # log_file = logging.FileHandler(filename=log_name, mode='a', encoding='utf-8')
-        # log_file.setLevel(logging.INFO)
-        # # formatter = logging.Formatter(
-        # #     '%(asctime)s - %(levelname)s: %(message)s'
-        # # )
-        # log_file.setFormatter(coloredFormatter)
-        #
-        # if verbose:
-        #     log_terminal = logging.StreamHandler()
-        #     log_terminal.setLevel(logging.INFO)
-        #     log_terminal.setFormatter(coloredFormatter)
-        #     self.logger.addHandler(log_terminal)
-        # self.logger.addHandler(log_file)
 
         self.tracker_dir = os.path.join(self.root_dir, 'tracker')
         self.writer = tensorboard.SummaryWriter(self.tracker_dir, **kwargs)
@@ -126,11 +86,11 @@ class Tracker(GeneralTracker):
         self.writer.flush()
 
     @on_main_process
-    def INFO(self, msg, **kwargs):
+    def info(self, msg, **kwargs):
         self._logger.info(msg, **kwargs)
 
     @on_main_process
-    def DEBUG(self, msg, **kwargs):
+    def debug(self, msg, **kwargs):
         self._logger.debug(msg, **kwargs)
 
     @on_main_process
