@@ -1,10 +1,10 @@
 ## TODO Lists
 
-- [ ] datasets
-  - [ ] Transforms
-    - [ ] noise 
+- [x] datasets
+  - [x] Transforms
+    - [x] noise 
     - [ ] blurry
-    - [ ] downsample
+    - [x] downsample
   - [ ] Image Denoising
   - [ ] Super Resolution
   - [ ] Video Recognition
