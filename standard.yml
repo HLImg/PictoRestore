@@ -18,6 +18,22 @@ data:
             aug_mode: ~
             read_mode: lmdb
 
+net:
+    ~
+
+model:
+    ~
+
+loss:
+    l1:
+        weight: 1.
+        reduction: mean
+    mse:
+        weight: 2.
+        reduction: mean
+
+metric:
+    ~
 
 
 

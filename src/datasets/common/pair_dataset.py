@@ -9,7 +9,7 @@ import src.datasets.transforms as transforms
 
 from .base_dataset import BaseDataSet
 
-from src.utils.tools.registry import DATASET_REGISTRY
+from src.utils import DATASET_REGISTRY
 
 @DATASET_REGISTRY.register()
 class PairDataset(BaseDataSet):

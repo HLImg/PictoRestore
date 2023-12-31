@@ -8,7 +8,9 @@ import numpy as np
 import src.datasets.transforms as transforms
 
 from .base_dataset import BaseDataSet
+from src.utils import DATASET_REGISTRY
 
+@DATASET_REGISTRY.register()
 class SingleDataset(BaseDataSet):
     def __init__(self,
                  hq_path,
