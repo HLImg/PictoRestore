@@ -1,3 +1,27 @@
+seed: 2017
+root_dir: ./exp
+run_name: nafnet-base
+
+model:
+    batch_size: 4
+    num_machine: 1
+    num_worker: 8
+    save_freq: !!float 5e3
+    iteration: !!float 2e5
+    resume:
+        state: ~
+    optim:
+        name: adam
+        param:
+            lr: 2.e-4
+            weight_decay: 0.
+            betas: [0.9, 0.99]
+    schedule:
+        name: CosineAnnealingLR
+        param:
+            T_max: 640000
+            eta_min: 1.e-7
+
 data:
     train:
         name: PairDataSet
@@ -32,8 +56,6 @@ arch:
                 FFN_Expand: 2
                 drop_rate: 0.
 
-model:
-    ~
 
 loss:
     l1:
@@ -42,6 +64,7 @@ loss:
     mse:
         weight: 2.
         reduction: mean
+
 
 metric:
     psnr_rgb:

@@ -18,4 +18,4 @@ def get_arch(config):
             obj_name=arch_cfg[name]['name']
         )(**arch_cfg[name]['param'])
 
-    return  ret
+    return ret
