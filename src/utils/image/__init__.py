@@ -5,8 +5,4 @@
 # @Email : lianghao@whu.edu.cn
 
 from .hyperspectral import (load_hsi_ICVL, load_hsi_Realistic)
-
-
-__all__ = [
-    'load_hsi_ICVL', 'load_hsi_Realistic'
-]
+from .rgb import (calculate_psnr, calculate_ssim)

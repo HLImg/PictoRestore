@@ -18,8 +18,19 @@ data:
             aug_mode: ~
             read_mode: lmdb
 
-net:
-    ~
+arch:
+    net_g:
+        name: NAFNet
+        param:
+            in_ch: 3
+            num_feats: 64
+            mid_blk_nums: 12
+            enc_blk_nums: [2, 2, 4, 8]
+            dec_blk_nums : [2, 2, 2, 2]
+            blk_params:
+                DW_Expand: 2
+                FFN_Expand: 2
+                drop_rate: 0.
 
 model:
     ~
@@ -33,7 +44,15 @@ loss:
         reduction: mean
 
 metric:
-    ~
+    psnr_rgb:
+        crop_border: 0
+        input_order: CHW
+        test_y_channel: False
+    ssim_rgb:
+        crop_border: 0
+        input_order: CHW
+        test_y_channel: False
+
 
 
 

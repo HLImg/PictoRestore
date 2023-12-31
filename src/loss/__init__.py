@@ -16,10 +16,12 @@ def get_loss(config):
     for name in loss_cfg.keys():
         ret[name] = LOSS_REGISTRY.get_obj(name)(**loss_cfg[name])
 
-    def cal_loss(input, target):
+    def cal_loss(inputs, targets):
+        # TODO: if multiple loss functions are present, return individual loss
+        #       components for plotting.
         res = 0.
-        for name, loss in ret.items():
-            res += loss(input, target)
+        for _, loss in ret.items():
+            res += loss(inputs, targets)
         return res
 
     return cal_loss
