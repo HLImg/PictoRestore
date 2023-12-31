@@ -50,9 +50,16 @@ class BaseModel(object):
                                          params=config['model']['optim']['param'],
                                          net=self.net_g)
         if not config['model'].get('schedule', False):
+
             self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
-                optimizer=self.optimizer, milestones=[]
+                optimizer=self.optimizer, milestones=[self.total_iters * self.num_gpu * 10]
             )
+
+        else:
+            config['model']['schedule']['num_warmup_steps'] *= self.num_gpu
+            config['model']['schedule']['num_training_steps'] *= self.num_gpu
+            self.scheduler = setup_scheduler(optimizer=self.optimizer,
+                                             params=config['model']['schedule'])
 
 
 

@@ -9,6 +9,8 @@ import random
 import numpy as np
 import torch.optim as optim
 
+from diffusers.optimization import get_scheduler
+
 
 def set_seed(seed=2017):
     random.seed(seed)
@@ -35,17 +37,8 @@ def setup_optimizer(name, net, params):
     return optimizer
 
 
-def setup_scheduler(name, optimizer, params):
+def setup_scheduler(optimizer, params):
     if not isinstance(params, dict):
         raise TypeError('params must be a dict')
     params['optimizer'] = optimizer
-    if name.lower() == 'CosineAnnealingLR'.lower():
-        scheduler = optim.lr_scheduler.CosineAnnealingLR(**params)
-    elif name.lower() == 'CosineAnnealingWarmRestarts'.lower():
-        scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(**params)
-    elif name.lower() == 'MultiStepLR'.lower():
-        scheduler = optim.lr_scheduler.MultiStepLR(**params)
-    else:
-        raise ValueError(f"Only support CosineAnnealingLR, CosineAnnealingWarmRestarts "
-                         f"and MultiStepLR, but received {name}")
-    return scheduler
+    return get_scheduler(**params)
