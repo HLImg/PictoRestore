@@ -86,7 +86,7 @@ class ToNdarray(BasicObject):
     def __call__(self, *tensors):
         res = []
         for tensor in tensors:
-            tensor = tensor.float().detach().cpu()
+            tensor = tensor.float().detach().cpu().numpy()
             res.append(tensor)
         return self.return_list(res)
 
@@ -99,6 +99,7 @@ class ToUint8(BasicObject):
             res.append(image)
         return self.return_list(res)
 
+
 class Uint8ToSingle(BasicObject):
     def __call__(self, *images):
         res = []
@@ -106,6 +107,7 @@ class Uint8ToSingle(BasicObject):
             image = self.uint8_to_single(image)
             res.append(image)
         return self.return_list(res)
+
 
 class Uint16ToSingle(BasicObject):
     def __call__(self, *images):
@@ -252,3 +254,19 @@ class RandomCrop(BasicObject):
 class Identity(BasicObject):
     def __call__(self, *images):
         return self.return_list(images)
+
+
+class ToNdarray_chw2hwc(BasicObject):
+    def __call__(self, *images):
+        if isinstance(images[0], torch.Tensor):
+            images = ToNdarray()(*images)
+        if not isinstance(images[0], np.ndarray):
+            raise TypeError(f"Only support torch.Tensor and np.ndarray, but received {type(images[0])}")
+
+        res = []
+        for image in images:
+            if len(image.shape) == 4:
+                res.append(np.transpose(image, (0, 2, 3, 1)))
+            elif len(image.shape) == 3:
+                res.append(np.transpose(image, (1, 2, 0)))
+        return self.return_list(res)

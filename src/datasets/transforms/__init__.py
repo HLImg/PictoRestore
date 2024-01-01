@@ -18,7 +18,7 @@ The referenced code are as follows:
 
 from .basics import (Compose, ToImage, ToUint8, ToUint16, ToNdarray,
                      ToTensor, CenterCrop, RandomCrop, Identity,
-                     Uint16ToSingle, Uint8ToSingle)
+                     Uint16ToSingle, Uint8ToSingle, ToNdarray_chw2hwc)
 
 from .noise import (NIIDGaussianNoise, IIDGaussianNoise, PoissonNoise,
                     JPEGNoise, ImpulseNoise, StripeNoise, DeadLineNoise,
@@ -33,5 +33,5 @@ __all__ = [
     'CenterCrop', 'RandomCrop', 'NIIDGaussianNoise', 'IIDGaussianNoise',
     'PoissonNoise', 'JPEGNoise', 'ImpulseNoise', 'StripeNoise', 'DeadLineNoise',
     'ComplexNoise', 'Flip', 'FlipUD', 'FlipLR', 'RandomFlip', 'RandomRotation',
-    'Identity', 'Uint16ToSingle', 'Uint8ToSingle'
+    'Identity', 'Uint16ToSingle', 'Uint8ToSingle', 'ToNdarray_chw2hwc'
 ]

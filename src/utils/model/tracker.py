@@ -7,6 +7,7 @@
 import os
 import time
 import yaml
+import socket
 import shutil
 import logging
 import coloredlogs
@@ -14,6 +15,12 @@ import coloredlogs
 from datetime import datetime
 from accelerate.tracking import (on_main_process, GeneralTracker, listify)
 
+class HostnameFilter(logging.Filter):
+    hostname = socket.gethostname()
+
+    def filter(self, record):
+        record.hostname = self.hostname
+        return True
 
 class Tracker(GeneralTracker):
     name = "tensorboard"
@@ -34,22 +41,17 @@ class Tracker(GeneralTracker):
             os.mkdir(self.root_dir)
 
         self._logger = logging.getLogger(__name__)
+        self._logger.propagate = verbose
         self._logger.setLevel(logging.INFO)
 
         log_name = os.path.join(self.root_dir, f'{self.time_stamp}.log')
-
-        file_handler = logging.FileHandler(filename=log_name, mode='a', encoding='utf-8')
-
         fmt = '%(asctime)s %(hostname)s[%(process)d] %(levelname)s %(message)s'
-        if verbose:
-            coloredlogs.install(logger=self._logger, level=logging.INFO, fmt=fmt)
-
-        self._logger.addHandler(file_handler)
-
         formatter = logging.Formatter(fmt)
-
+        file_handler = logging.FileHandler(filename=log_name, mode='a', encoding='utf-8')
         file_handler.setFormatter(formatter)
-
+        file_handler.addFilter(HostnameFilter())
+        self._logger.addHandler(file_handler)
+        file_handler.setFormatter(formatter)
         file_handler.close()
 
         self.tracker_dir = os.path.join(self.root_dir, 'tracker')

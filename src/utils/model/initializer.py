@@ -6,10 +6,9 @@
 
 import torch
 import random
+import diffusers
 import numpy as np
 import torch.optim as optim
-
-from diffusers.optimization import get_scheduler
 
 
 def set_seed(seed=2017):
@@ -22,7 +21,7 @@ def set_seed(seed=2017):
         torch.backends.cudnn.benchmark = False
 
 
-def setup_optimizer(name, net, params):
+def get_optimizer(name, net, params):
     if not isinstance(params, dict):
         raise TypeError('params must be a dict')
     params['params='] = net.parameters()
@@ -37,8 +36,9 @@ def setup_optimizer(name, net, params):
     return optimizer
 
 
-def setup_scheduler(optimizer, params):
+def get_scheduler(optimizer, params):
     if not isinstance(params, dict):
         raise TypeError('params must be a dict')
     params['optimizer'] = optimizer
-    return get_scheduler(**params)
+    params['name'] = params['name'].lower()
+    return diffusers.optimization.get_scheduler(**params)

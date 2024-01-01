@@ -1,14 +1,18 @@
 seed: 2017
-root_dir: ./exp
+exp_dir: ./exp
 run_name: nafnet-base
 
 model:
+    name: BaseModel
+
     batch_size: 4
-    num_machine: 1
+    num_nodes: 1
     num_worker: 8
     save_freq: !!float 5e3
     iteration: !!float 2e5
+    gradient_accumulation: 2
     resume:
+        mode: True
         state: ~
     optim:
         name: adam

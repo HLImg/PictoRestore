@@ -3,3 +3,5 @@
 # @Author : Liang Hao
 # @FileName : __init__.py
 # @Email : lianghao@whu.edu.cn
+
+from .base_model import BaseModel

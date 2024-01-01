@@ -6,5 +6,5 @@
 
 from .ema import EMA
 from .tracker import Tracker
-from .initializer import (set_seed, setup_optimizer, setup_scheduler)
+from .initializer import (set_seed, get_optimizer, get_scheduler)
 from .checkpoint import load_state_accelerate, save_state_accelerate

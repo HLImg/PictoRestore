@@ -14,7 +14,7 @@ def get_metric(config):
     for name in metric_cfg.keys():
         ret[name] = METRIC_REGISTRY.get_obj(name)(**metric_cfg[name])
 
-    def calculate_metric(input, target):
+    def calculate_metric(input, target) -> dict:
         res = {}
         for name, metric in ret.items():
             res[name] = metric(input, target)
