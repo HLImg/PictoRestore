@@ -35,13 +35,14 @@ class BaseModel(object):
         self.num_gpu = accelerator.num_process
 
         self.loss = 0
-        self.num_nodes = config['model']['num_nodes']
+        self.val_freq = config['val']['save_freq']
         self.save_freq = config['model']['save_freq']
+        self.num_nodes = config['model']['num_nodes']
         self.total_iters = config['model']['iteration']
         self.batch_size = config['model']['batch_size']
 
         # the directory for saving training results
-        self.root_dir = os.path.join(config.exp_dir, config.run_name)
+        self.root_dir = os.path.join(config['exp_dir'], config['run_name'])
         if not os.path.exists(self.root_dir):
             os.mkdir(self.root_dir)
         # the subdir for saving training states
@@ -53,6 +54,7 @@ class BaseModel(object):
         dataset = get_dataset(config)
         self.train_dataloader = None
         self.test_dataloader = None
+        self.test_num = 0
         if 'train' in dataset:
             self.train_dataloader = DataLoader(dataset['train'],
                                                batch_size=self.batch_size,
@@ -64,6 +66,7 @@ class BaseModel(object):
                                               batch_size=1,
                                               shuffle=False,
                                               num_workers=0)
+            self.test_num = len(dataset['test'])
 
         # TODO multiple network
         self.net_g = get_arch(config)['net_g']
@@ -101,11 +104,11 @@ class BaseModel(object):
         logger.info("Successfully setup [Train/Test DataLoader, Net, Optimizer, Scheduler]")
 
         resume_info = None
-        if config['model']['resume']['mode']:
+        if config['resume']:
             resume_info = load_state_accelerate(
                 accelerator=self.accelerator,
                 root_dir=self.root_dir,
-                resume_state=config['model']['resume']['state']
+                resume_state=config['ckpt']
             )
             logger.info("Successfully resume training states by accelerate")
 
@@ -118,7 +121,9 @@ class BaseModel(object):
         self.end_epoch = math.ceil(self.total_iters / iters_per_epoch)
         self.trans2bhwc_np = ToNdarray_chw2hwc()
 
+        self.cur_metric = {}
         self.best_metric = {}
+        self.best_metric_name = config['model']['best_metric']
 
     def __feed__(self, data):
         self.optimizer.zero_grad()
@@ -139,12 +144,10 @@ class BaseModel(object):
         all_predicted, all_target = self.accelerator.gather_for_metrics((predicted, hq))
         inputs = self.trans2bhwc_np(all_predicted)  # b h w c
         targets = self.trans2bhwc_np(all_target)  # b h w c
-        res = {}
         for i in range(inputs.size(0)):
             tmp = self.metric(inputs[i,], targets[i,])
             for key, value in tmp.items():
-                res[key] = res.get(key, 0) + value
-        return res
+                self.cur_metric[key] = self.cur_metric.get(key, 0) + value
 
     def save_state(self, save_name):
         save_state_accelerate(accelerator=self.accelerator,
@@ -153,3 +156,23 @@ class BaseModel(object):
 
     def get_cur_lr(self):
         return self.optimizer.param_groups[0]['lr']
+
+    @on_main_process
+    def __update_metric__(self, cur_iter):
+        flag = False
+        self.cur_metric['iter'] = cur_iter
+        if self.best_metric[self.best_metric_name] < self.cur_metric[self.best_metric_name]:
+            self.best_metric = self.cur_metric
+            flag = True
+
+        lines = [f'cur_iter : {cur_iter}, cur_lr : {self.get_cur_lr()}']
+        all_keys = set(self.best_metric.keys()) | set(self.cur_metric.keys())
+        max_key_length = max(len(key) for key in all_keys)
+
+        for key in self.best_metric.keys():
+            best_ = self.best_metric.get(key, 'N/A')
+            current_ = self.cur_metric.get(key, 'N/A')
+            lines.append(f"\t \t \t \t \t \t {key:>{max_key_length}} @ best={best_:.4f}, current={current_:.4f}")
+
+        return flag, "\n".join(lines)
+

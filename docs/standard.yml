@@ -4,16 +4,15 @@ run_name: nafnet-base
 
 model:
     name: BaseModel
-
     batch_size: 4
     num_nodes: 1
     num_worker: 8
+    val_freq: !!float 2e3
     save_freq: !!float 5e3
     iteration: !!float 2e5
+    best_metric: psnr_rgb
     gradient_accumulation: 2
-    resume:
-        mode: True
-        state: ~
+
     optim:
         name: adam
         param:
@@ -29,8 +28,8 @@ data:
     train:
         name: PairDataSet
         param:
-            lq_path: ~
-            hq_path: ~
+            lq_path: hello
+            hq_path: hello
             down_scale: 1
             patch_size: 128
             aug_mode: ['flip', 'rot']
@@ -38,11 +37,11 @@ data:
     test:
         name: PairDataSet
         param:
-            lq_path: ~
-            hq_path: ~
+            lq_path: hello
+            hq_path: hello
             down_scale: 1
             patch_size: -1
-            aug_mode: ~
+            aug_mode: hello
             read_mode: lmdb
 
 arch:
@@ -78,7 +77,3 @@ metric:
         crop_border: 0
         input_order: CHW
         test_y_channel: False
-
-
-
-

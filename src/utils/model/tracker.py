@@ -5,15 +5,13 @@
 # @Email : lianghao@whu.edu.cn
 
 import os
-import time
 import yaml
 import socket
-import shutil
 import logging
-import coloredlogs
 
 from datetime import datetime
 from accelerate.tracking import (on_main_process, GeneralTracker, listify)
+
 
 class HostnameFilter(logging.Filter):
     hostname = socket.gethostname()
@@ -22,11 +20,13 @@ class HostnameFilter(logging.Filter):
         record.hostname = self.hostname
         return True
 
+
 class Tracker(GeneralTracker):
     name = "tensorboard"
     requires_logging_directory = True
+
     @on_main_process
-    def __init__(self, run_name, save_dir, verbose=False, **kwargs):
+    def __init__(self, config, verbose=False, **kwargs):
         try:
             from torch.utils import tensorboard
         except ModuleNotFoundError:
@@ -34,8 +34,11 @@ class Tracker(GeneralTracker):
 
         super().__init__()
 
+        exp_dir = config['exp_dir']
+        run_name = config['run_name']
+
         self.time_stamp = datetime.now().strftime("%Y%m%d_%H%M")
-        self.root_dir = os.path.join(save_dir, run_name)
+        self.root_dir = os.path.join(exp_dir, run_name)
 
         if not os.path.exists(self.root_dir):
             os.mkdir(self.root_dir)
@@ -104,4 +107,11 @@ class Tracker(GeneralTracker):
     def finish(self):
         self.writer.close()
 
+    @on_main_process
+    def store_init_config(self, config):
+        if config.get('super_param', False):
+            self.store_init_configuration(config['super_param'])
+
+        with open(os.path.join(self.root_dir, 'config.yml'), 'w') as file:
+            yaml.dump(config, file, default_flow_style=None, sort_keys=False)
 
