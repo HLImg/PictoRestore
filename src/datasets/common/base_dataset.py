@@ -45,7 +45,7 @@ class BaseDataSet(Dataset):
     """
 
     def __init__(self,
-                 data_type=np.uint8,
+                 data_type="uint8",
                  read_mode='disk',
                  aug_mode=['flip', 'rot']):
         if aug_mode == None:
@@ -77,9 +77,9 @@ class BaseDataSet(Dataset):
         self.read_mode = read_mode
         self.data_type = data_type
 
-        if self.data_type == np.uint8:
+        if self.data_type == "uint8":
             self.trans2float32 = transforms.Uint8ToSingle()
-        elif self.data_type == np.uint16:
+        elif self.data_type == "uint16":
             self.trans2float32 = transforms.Uint16ToSingle()
         else:
             raise ValueError(f"Unknown data type {data_type}, only support Uint8 and Uint16")

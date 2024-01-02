@@ -79,6 +79,7 @@ class ToTensor(BasicObject):
             else:
                 if self.mode.lower() == 'hwc':
                     image = np.transpose(image, (2, 0, 1))
+            image = image.copy()
             res.append(torch.from_numpy(image))
 
         return self.return_list(res)

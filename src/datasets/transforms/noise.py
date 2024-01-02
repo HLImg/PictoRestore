@@ -23,6 +23,7 @@ class BasicNoise(BasicObject):
         """
         np.random.seed(seed=seed)
         self.clip = clip
+        noise_range = eval(noise_range)
         if isinstance(noise_range, list):
             self.noise_range = noise_range
         elif isinstance(noise_range, tuple):

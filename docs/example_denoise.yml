@@ -1,5 +1,4 @@
 seed: 2017
-a: !!float 2e6
 exp_dir: results
 run_name: nafnet-base
 

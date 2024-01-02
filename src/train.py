@@ -13,9 +13,9 @@ from .utils import Tracker, backup
 
 
 def train(model, tracker):
-    tracker.info(f"[{model.device}]: Start training, it will take a time")
+    tracker.info(f"[{model.device}]: Start training, please note that it may take some time")
     cur_iter = model.cur_iter
-
+    model.accelerator.wait_for_everyone()
     for epoch in range(model.start_epoch, model.end_epoch):
         loop_train = tqdm(model.train_dataloader,
                           desc="training",
@@ -25,10 +25,10 @@ def train(model, tracker):
             model.__feed__(data)
             cur_iter += 1
 
-            loop_train.set_description(f"[Epoch [{epoch} / {model.end_epoch}]]")
+            loop_train.set_description(f"[Epoch: {epoch} / {model.end_epoch}]")
             loop_train.set_postfix(lr=model.get_cur_lr())
 
-            tracker.log(values={'train/loss': model.loss.item()},
+            tracker.log(values={'train/loss': model.loss},
                         step=cur_iter)
 
             if (model.test_num > 0) and (cur_iter % model.val_freq == 0 or cur_iter == 1000):
@@ -51,8 +51,8 @@ def train(model, tracker):
                 model.save_state(save_name=f"save_state_{cur_iter}")
                 tracker.info(f"{model.device}: save training state, {cur_iter}")
 
-        tracker.info(f"{model.device}: Finish training")
-        tracker.finish()
+    tracker.info(f"{model.device}: Finish training")
+    tracker.finish()
 
 
 def main(args, config, accelerator):

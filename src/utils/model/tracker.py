@@ -36,6 +36,9 @@ class Tracker(GeneralTracker):
 
         exp_dir = config['exp_dir']
         run_name = config['run_name']
+        
+        if not os.path.exists(exp_dir):
+            os.mkdir(exp_dir)
 
         self.time_stamp = datetime.now().strftime("%Y%m%d_%H%M")
         self.root_dir = os.path.join(exp_dir, run_name)

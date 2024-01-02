@@ -3,3 +3,5 @@
 # @File    : __init__.py.py
 # @Author  : Hao Liang
 # @Email   : lianghao@whu.edu.cn
+
+from .synthetic_noise_rgb import SynRGBNoise

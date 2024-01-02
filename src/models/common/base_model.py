@@ -32,14 +32,14 @@ class BaseModel(object):
         self.config = config
         self.accelerator = accelerator
         self.device = accelerator.device
-        self.num_gpu = accelerator.num_process
+        self.num_gpu = accelerator.num_processes
 
         self.loss = 0
-        self.val_freq = config['val']['save_freq']
-        self.save_freq = config['model']['save_freq']
-        self.num_nodes = config['model']['num_nodes']
-        self.total_iters = config['model']['iteration']
-        self.batch_size = config['model']['batch_size']
+        self.val_freq = int(config['model']['val_freq'])
+        self.save_freq = int(config['model']['save_freq'])
+        self.num_nodes = int(config['model']['num_nodes'])
+        self.total_iters = int(config['model']['iteration'])
+        self.batch_size = int(config['model']['batch_size'])
 
         # the directory for saving training results
         self.root_dir = os.path.join(config['exp_dir'], config['run_name'])

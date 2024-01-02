@@ -18,7 +18,7 @@ class SingleDataset(BaseDataSet):
                  patch_size=-1,
                  aug_mode=None,
                  read_mode='disk',
-                 data_type=np.uint8
+                 data_type="uint8"
                  ):
         """
         Please note that the operators for augmentation and normalization (which convert input data to np.float32)
@@ -29,7 +29,7 @@ class SingleDataset(BaseDataSet):
         :param patch_size: if patch size is equal to 1, input images will not be cropped into patches.
         :param aug_mode: ['flip', 'rot'] | None | 'flip' | 'rot'
         :param read_mode: 'disk' | 'lmdb'
-        :param data_type: np.uint8 | np.uint16
+        :param data_type: "uint8" | "uint16"
         """
         super().__init__(aug_mode=aug_mode,
                          read_mode=read_mode,
@@ -56,7 +56,7 @@ class SingleDataset(BaseDataSet):
         ])
 
     def __len__(self):
-        return len(self)
+        return self.length
 
     def __getitem__(self, item):
         self.hq_params['item'] = item
