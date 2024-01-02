@@ -7,7 +7,7 @@ model:
     batch_size: 4
     num_nodes: 1
     num_worker: 8
-    val_freq: !!float 2e3
+    val_freq: !!float 2e1
     save_freq: !!float 5e3
     iteration: 640000
     best_metric: psnr_rgb

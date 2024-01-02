@@ -142,17 +142,23 @@ class BaseModel(object):
         lq, hq = data['lq'], data['hq']
         predicted = self.net_g(lq)
         all_predicted, all_target = self.accelerator.gather_for_metrics((predicted, hq))
+        # print(type(all_predicted), type(all_target), all_predicted.shape)
         inputs = self.trans2bhwc_np(all_predicted)  # b h w c
         targets = self.trans2bhwc_np(all_target)  # b h w c
-        for i in range(inputs.size(0)):
+        
+        for i in range(inputs.shape[0]):
             tmp = self.metric(inputs[i,], targets[i,])
             for key, value in tmp.items():
                 self.cur_metric[key] = self.cur_metric.get(key, 0) + value
-
+    
+    @on_main_process
     def save_state(self, save_name):
-        save_state_accelerate(accelerator=self.accelerator,
-                              save_dir=self.ckpt_dir,
-                              save_name=save_name)
+        save_path = os.path.join(self.ckpt_dir, save_name)
+        self.accelerator.save_state(save_path, safe_serialization=False)
+        logger.info(f"Saves all training-related states using Accelerate to the specified path: {save_path}.")
+        # save_state_accelerate(accelerator=self.accelerator,
+        #                       save_dir=self.ckpt_dir,
+        #                       save_name=save_name)
 
     def get_cur_lr(self):
         return self.optimizer.param_groups[0]['lr']
@@ -161,7 +167,7 @@ class BaseModel(object):
     def __update_metric__(self, cur_iter):
         flag = False
         self.cur_metric['iter'] = cur_iter
-        if self.best_metric[self.best_metric_name] < self.cur_metric[self.best_metric_name]:
+        if self.best_metric.get(self.best_metric_name, 0) < self.cur_metric[self.best_metric_name]:
             self.best_metric = self.cur_metric
             flag = True
 

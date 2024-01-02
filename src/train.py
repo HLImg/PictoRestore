@@ -41,7 +41,7 @@ def train(model, tracker):
                     model.cur_metric[key] /= model.test_num
 
                 is_update, info_update = model.__update_metric__(cur_iter)
-                tracker.log(model.cur_iter, step=cur_iter)
+                tracker.log(model.cur_metric, step=cur_iter)
                 tracker.info(msg=info_update)
 
                 if is_update:

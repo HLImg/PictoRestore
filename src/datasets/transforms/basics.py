@@ -263,9 +263,13 @@ class ToNdarray_chw2hwc(BasicObject):
     def __call__(self, *images):
         if isinstance(images[0], torch.Tensor):
             images = ToNdarray()(*images)
+
+        if not isinstance(images, (list, tuple)):
+            images = [images]
+            
         if not isinstance(images[0], np.ndarray):
             raise TypeError(f"Only support torch.Tensor and np.ndarray, but received {type(images[0])}")
-
+        
         res = []
         for image in images:
             if len(image.shape) == 4:
