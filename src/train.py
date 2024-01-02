@@ -17,7 +17,7 @@ def train(model, tracker):
     cur_iter = model.cur_iter
 
     for epoch in range(model.start_epoch, model.end_epoch):
-        loop_train = tqdm(model.train_loader,
+        loop_train = tqdm(model.train_dataloader,
                           desc="training",
                           disable=not model.accelerator.is_main_process)
         model.net_g.train()
@@ -32,6 +32,7 @@ def train(model, tracker):
                         step=cur_iter)
 
             if (model.test_num > 0) and (cur_iter % model.val_freq == 0 or cur_iter == 1000):
+                # TODO: save image, traker.log_image
                 model.cur_metric = {}
                 for _, val_data in enumerate(model.test_dataloader):
                     model.__eval__(val_data)
@@ -55,7 +56,8 @@ def train(model, tracker):
 
 
 def main(args, config, accelerator):
-    trainer = get_model(accelerator=accelerator, config=config)
     tracker = Tracker(config=config, verbose=args.verbose)
+    accelerator.wait_for_everyone()
     tracker.store_init_config(config=config)
+    trainer = get_model(accelerator=accelerator, config=config)
     train(model=trainer, tracker=tracker)

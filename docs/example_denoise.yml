@@ -1,4 +1,5 @@
 seed: 2017
+a: !!float 2e6
 exp_dir: results
 run_name: nafnet-base
 
@@ -9,10 +10,9 @@ model:
     num_worker: 8
     val_freq: !!float 2e3
     save_freq: !!float 5e3
-    iteration: !!float 2e5
+    iteration: 640000
     best_metric: psnr_rgb
-    gradient_accumulation: 2
-
+    gradient_accumulation: 1
     optim:
         name: adam
         param:
@@ -26,23 +26,29 @@ model:
 
 data:
     train:
-        name: PairDataSet
+        name: SynRGBNoise
         param:
-            lq_path: hello
-            hq_path: hello
+            hq_path: /data/dataset/low_level/wed_data
             down_scale: 1
             patch_size: 128
             aug_mode: ['flip', 'rot']
-            read_mode: lmdb
+            read_mode: disk
+            data_type: uint8
+            noise_clip: True
+            noise_name: Gaussian
+            noise_range: (5, 60, 5)
+            noise_seed: 2018
+
+
     test:
         name: PairDataSet
         param:
-            lq_path: hello
-            hq_path: hello
+            lq_path: /data/dataset/low_level/test_dataset/CBSD68/sigma50
+            hq_path: /data/dataset/low_level/test_dataset/CBSD68/gt
             down_scale: 1
             patch_size: -1
-            aug_mode: hello
-            read_mode: lmdb
+            aug_mode: ~
+            read_mode: disk
 
 arch:
     net_g:
@@ -58,13 +64,9 @@ arch:
                 FFN_Expand: 2
                 drop_rate: 0.
 
-
 loss:
     l1:
         weight: 1.
-        reduction: mean
-    mse:
-        weight: 2.
         reduction: mean
 
 

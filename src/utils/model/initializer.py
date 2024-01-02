@@ -24,7 +24,7 @@ def set_seed(seed=2017):
 def get_optimizer(name, net, params):
     if not isinstance(params, dict):
         raise TypeError('params must be a dict')
-    params['params='] = net.parameters()
+    params['params'] = net.parameters()
     if name.lower() == 'adam':
         optimizer = optim.Adam(**params)
     elif name.lower() == 'sgd':
