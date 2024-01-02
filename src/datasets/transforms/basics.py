@@ -53,6 +53,8 @@ class Compose(BasicObject):
         if self.p == 1 or random.random() < self.p:
             for t in self.transforms:
                 images = t(*images)
+                if not isinstance(images, (tuple, list)):
+                    images = [images]
         else:
             transforms = random.sample(self.transforms, k=self.k)
             for t in transforms:

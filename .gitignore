@@ -2,3 +2,4 @@
 .idea*/
 *debug*
 *.txt
+*.pyc
