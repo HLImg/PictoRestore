@@ -69,7 +69,10 @@ class Tracker(GeneralTracker):
         file_handler.close()
 
         self.tracker_dir = os.path.join(self.root_dir, 'tracker')
-        self.writer = tensorboard.SummaryWriter(self.tracker_dir, **kwargs)
+        if not os.path.exists(self.tracker_dir):
+            os.mkdir(self.tracker_dir)
+        self.tensorboard_dir = os.path.join(self.tracker_dir, str(self.time_stamp))
+        self.writer = tensorboard.SummaryWriter(self.tensorboard_dir, **kwargs)
 
     @property
     def tracker(self):
@@ -81,10 +84,7 @@ class Tracker(GeneralTracker):
         self.writer.add_hparams(values, metric_dict={})
         self.writer.flush()
 
-        dir_name = os.path.join(self.tracker_dir, str(self.time_stamp))
-        os.makedirs(dir_name, exist_ok=True)
-
-        with open(os.path.join(dir_name, "hparams.yml"), 'w') as outfile:
+        with open(os.path.join(self.tensorboard_dir, "hparams.yml"), 'w') as outfile:
             try:
                 yaml.dump(values, outfile)
             except yaml.representer.RepresenterError:
@@ -126,4 +126,9 @@ class Tracker(GeneralTracker):
 
         with open(os.path.join(self.root_dir, 'config.yml'), 'w') as file:
             yaml.dump(config, file, default_flow_style=None, sort_keys=False)
+        
+        if not config.get("hyparams", False):
+            return
+        else:
+            self.store_init_configuration(config["hyparams"])
 

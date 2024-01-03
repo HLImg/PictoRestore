@@ -2,6 +2,18 @@ seed: 10
 exp_dir: results
 run_name: nafnet-sidd-wf-32
 
+hyparams:
+    batch_size: 32 # num_gpus x num_nodes x batch_size_per_gpu
+    init_lr: 2.e-4
+    patch_size: 238
+    optim_name: Adam
+    optim_weight_decay: 0.
+    optim_beta_1: 1
+    optim_beta_2: 1
+    schedule_name: cosine
+    schedule_num_warmup: 200
+    schedule_num_train: 640000
+
 model:
     name: BaseModel
     num_nodes: 1
@@ -13,7 +25,6 @@ model:
     best_metric: psnr_rgb
     gradient_accumulation: 1
     is_eval_ddp: True
-    
     optim:
         name: AdamW
         param:

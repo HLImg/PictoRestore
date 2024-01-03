@@ -2,6 +2,18 @@ seed: 2017
 exp_dir: results
 run_name: nafnet-base
 
+hyparams:
+    batch_size: 32 # num_gpus x num_nodes x batch_size_per_gpu
+    init_lr: 2.e-4
+    patch_size: 238
+    optim_name: Adam
+    optim_weight_decay: 0.
+    optim_beta_1: 1
+    optim_beta_2: 1
+    schedule_name: cosine
+    schedule_num_warmup: 200
+    schedule_num_train: 640000
+
 model:
     name: BaseModel
     batch_size: 4
