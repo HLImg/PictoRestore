@@ -81,8 +81,12 @@ class BaseDataSet(Dataset):
             self.trans2float32 = transforms.Uint8ToSingle()
         elif self.data_type == "uint16":
             self.trans2float32 = transforms.Uint16ToSingle()
+        elif self.data_type == 'float32':
+            self.trans2float32 = transforms.Identity()
+        elif self.data_type == 'float64':
+           self.trans2float32 = transforms.Identity()
         else:
-            raise ValueError(f"Unknown data type {data_type}, only support Uint8 and Uint16")
+            raise ValueError(f"Unknown data type {data_type}, only support uint8, uint16, float32, float64")
 
 
 
