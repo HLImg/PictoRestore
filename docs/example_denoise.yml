@@ -1,62 +1,56 @@
-seed: 2017
+seed: 10
 exp_dir: results
-run_name: nafnet-base
+run_name: nafnet-sidd-wf-32
 
 model:
     name: BaseModel
-    batch_size: 4
     num_nodes: 1
+    batch_size: 4
     num_worker: 8
-    val_freq: !!float 2e2
+    val_freq: !!float 2e3
     save_freq: !!float 5e3
-    iteration: 640000
+    iteration: !!float 2e5
     best_metric: psnr_rgb
     gradient_accumulation: 1
     is_eval_ddp: True
     
     optim:
-        name: adam
+        name: AdamW
         param:
-            lr: 0.003
+            lr: 1.e-3
             weight_decay: 0.
-            betas: [0.9, 0.99]
+            betas: [0.9, 0.9]
     schedule:
         name: cosine
         num_warmup_steps: 0
-        num_training_steps: 640000
+        num_training_steps: !!float 2e5
 
 data:
     train:
-        name: SynRGBNoise
+        name: PairDataset
         param:
-            hq_path: /data/dataset/low_level/wed_data
+            lq_path: /data/dataset/low_level/sidd/train_noisy.lmdb
+            hq_path: /data/dataset/low_level/sidd/train_gt.lmdb
             down_scale: 1
-            patch_size: 128
-            aug_mode: ['flip', 'rot']
-            read_mode: disk
-            data_type: uint8
-            noise_clip: True
-            noise_name: Gaussian
-            noise_range: (5, 60, 5)
-            noise_seed: 2018
-
-
+            patch_size: 256
+            aug_mode: ~
+            read_mode: lmdb
     test:
         name: PairDataSet
         param:
-            lq_path: /data/dataset/low_level/test_dataset/CBSD68/sigma50
-            hq_path: /data/dataset/low_level/test_dataset/CBSD68/gt
+            lq_path: /data/dataset/low_level/sidd/val_noisy.lmdb
+            hq_path: /data/dataset/low_level/sidd/val_gt.lmdb
             down_scale: 1
             patch_size: -1
             aug_mode: ~
-            read_mode: disk
+            read_mode: lmdb
 
 arch:
     net_g:
         name: NAFNet
         param:
             in_ch: 3
-            num_feats: 64
+            num_feats: 32
             mid_blk_nums: 12
             enc_blk_nums: [2, 2, 4, 8]
             dec_blk_nums : [2, 2, 2, 2]
