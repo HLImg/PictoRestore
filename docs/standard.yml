@@ -12,6 +12,7 @@ model:
     iteration: !!float 2e5
     best_metric: psnr_rgb
     gradient_accumulation: 2
+    is_eval_ddp: True
 
     optim:
         name: adam

@@ -45,7 +45,15 @@ class Tracker(GeneralTracker):
 
         if not os.path.exists(self.root_dir):
             os.mkdir(self.root_dir)
-
+        
+        self.ckpt_dir = os.path.join(self.root_dir, "save_state")
+        if not os.path.exists(self.ckpt_dir):
+            os.mkdir(self.ckpt_dir)
+        
+        self.best_dir = os.path.join(self.root_dir, "best_ckpt")
+        if not os.path.exists(self.best_dir):
+            os.mkdir(self.best_dir)
+            
         self._logger = logging.getLogger(__name__)
         self._logger.propagate = verbose
         self._logger.setLevel(logging.INFO)
@@ -69,6 +77,7 @@ class Tracker(GeneralTracker):
 
     @on_main_process
     def store_init_configuration(self, values: dict):
+    
         self.writer.add_hparams(values, metric_dict={})
         self.writer.flush()
 

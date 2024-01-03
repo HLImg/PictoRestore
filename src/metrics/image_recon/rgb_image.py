@@ -7,7 +7,7 @@
 import cv2
 import torch
 import numpy as np
-
+from skimage.metrics import peak_signal_noise_ratio as cal_psnr
 from src.utils import calculate_psnr, calculate_ssim, METRIC_REGISTRY
 
 @METRIC_REGISTRY.register()
@@ -18,6 +18,13 @@ class PSNR_RGB:
         self.test_y_chanel = test_y_channel
 
     def __call__(self, input, target):
+        assert input.dtype == target.dtype, f"the dtypes of input and target are different."
+        assert isinstance(input, np.ndarray) and isinstance(target, np.ndarray), f"input and target must be np.nadarray, and shape is (h, w, c)"
+        
+        if input.dtype == "float64" or input.dtype == "float32":
+            input = (input.clip(0, 1) * 255.).astype("uint8")
+            target = (target.clip(0, 1) * 255.).astype("uint8")
+            
         return calculate_psnr(img1=input,
                               img2=target,
                               crop_border=self.crop_border,
@@ -33,6 +40,13 @@ class SSIM_RGB:
         self.test_y_chanel = test_y_channel
 
     def __call__(self, input, target):
+        assert input.dtype == target.dtype, f"the dtypes of input and target are different."
+        assert isinstance(input, np.ndarray) and isinstance(target, np.ndarray), f"input and target must be np.nadarray, and shape is (h, w, c)"
+        
+        if input.dtype == "float64" or input.dtype == "float32":
+            input = (input.clip(0, 1) * 255.).astype("uint8")
+            target = (target.clip(0, 1) * 255.).astype("uint8")
+        
         return calculate_ssim(img1=input,
                               img2=target,
                               crop_border=self.crop_border,

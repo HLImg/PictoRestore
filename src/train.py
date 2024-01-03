@@ -10,6 +10,9 @@ import torch
 from tqdm import tqdm
 from .models import get_model
 from .utils import Tracker, backup
+from accelerate.state import PartialState
+
+state = PartialState()
 
 
 def train(model, tracker):
@@ -32,20 +35,12 @@ def train(model, tracker):
                         step=cur_iter)
 
             if (model.test_num > 0) and (cur_iter % model.val_freq == 0 or cur_iter == 1000):
-                # TODO: save image, traker.log_image
-                model.cur_metric = {}
-                for _, val_data in enumerate(model.test_dataloader):
-                    model.__eval__(val_data)
-
-                for key, val in model.cur_metric.items():
-                    model.cur_metric[key] /= model.test_num
-
-                is_update, info_update = model.__update_metric__(cur_iter)
-                tracker.log(model.cur_metric, step=cur_iter)
-                tracker.info(msg=info_update)
-
-                if is_update:
-                    model.save_state(save_name=f"best_{cur_iter}")
+                if model.is_eval_ddp:
+                    model.__eval_ddp__(cur_iter, tracker)
+                else:
+                    model.__eval_local__(cur_iter, tracker)
+                
+                model.__update_metric__(cur_iter, tracker)
 
             if cur_iter % model.save_freq == 0:
                 model.save_state(save_name=f"save_state_{cur_iter}")
@@ -56,8 +51,12 @@ def train(model, tracker):
 
 
 def main(args, config, accelerator):
-    tracker = Tracker(config=config, verbose=args.verbose)
+    with accelerator.local_main_process_first():
+        tracker = Tracker(config=config, verbose=args.verbose)
+        tracker.store_init_config(config=config)
+        
     accelerator.wait_for_everyone()
-    tracker.store_init_config(config=config)
+    
     trainer = get_model(accelerator=accelerator, config=config)
+    
     train(model=trainer, tracker=tracker)

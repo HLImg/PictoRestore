@@ -7,20 +7,22 @@ model:
     batch_size: 4
     num_nodes: 1
     num_worker: 8
-    val_freq: !!float 2e1
+    val_freq: !!float 2e2
     save_freq: !!float 5e3
     iteration: 640000
     best_metric: psnr_rgb
     gradient_accumulation: 1
+    is_eval_ddp: True
+    
     optim:
         name: adam
         param:
-            lr: 2.e-4
+            lr: 0.003
             weight_decay: 0.
             betas: [0.9, 0.99]
     schedule:
         name: cosine
-        num_warmup_steps: 200
+        num_warmup_steps: 0
         num_training_steps: 640000
 
 data:

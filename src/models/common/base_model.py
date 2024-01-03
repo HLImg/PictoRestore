@@ -25,6 +25,9 @@ from src.utils import MODEL_REGISTRY
 logger = logging.getLogger(__name__)
 coloredlogs.install(level=logging.INFO)
 
+from accelerate.state import PartialState
+state = PartialState()
+
 
 @MODEL_REGISTRY.register()
 class BaseModel(object):
@@ -40,15 +43,14 @@ class BaseModel(object):
         self.num_nodes = int(config['model']['num_nodes'])
         self.total_iters = int(config['model']['iteration'])
         self.batch_size = int(config['model']['batch_size'])
+        self.is_eval_ddp = config['model']['is_eval_ddp']
 
         # the directory for saving training results
         self.root_dir = os.path.join(config['exp_dir'], config['run_name'])
-        if not os.path.exists(self.root_dir):
-            os.mkdir(self.root_dir)
+
         # the subdir for saving training states
         self.ckpt_dir = os.path.join(self.root_dir, "save_state")
-        if not os.path.exists(self.ckpt_dir):
-            os.mkdir(self.ckpt_dir)
+        self.best_ckpt = os.path.join(self.root_dir, "best_ckpt")
 
         # dataset
         dataset = get_dataset(config)
@@ -94,9 +96,16 @@ class BaseModel(object):
         self.net_g, self.optimizer, self.scheduler = self.accelerator.prepare(
             self.net_g, self.optimizer, self.scheduler
         )
-
-        self.train_dataloader, self.test_dataloader, self.criterion = self.accelerator.prepare(
-            self.train_dataloader, self.test_dataloader, self.criterion
+        
+        if self.is_eval_ddp:
+            logger.warning("With Distributed Evaluation")
+            self.train_dataloader, self.test_dataloader, self.criterion = self.accelerator.prepare(
+                    self.train_dataloader, self.test_dataloader, self.criterion
+                    )
+        else:
+            logger.warning("Without Distributed Evaluation, On Local Main Process")
+            self.train_dataloader, self.criterion = self.accelerator.prepare(
+            self.train_dataloader, self.criterion
         )
 
         self.accelerator.register_for_checkpointing(self.scheduler)
@@ -137,21 +146,42 @@ class BaseModel(object):
             self.scheduler.step()
 
     @torch.no_grad()
-    @on_main_process
-    def __eval__(self, data):
-        lq, hq = data['lq'], data['hq']
-        predicted = self.net_g(lq)
-        all_predicted, all_target = self.accelerator.gather_for_metrics((predicted, hq))
-        # print(type(all_predicted), type(all_target), all_predicted.shape)
-        inputs = self.trans2bhwc_np(all_predicted)  # b h w c
-        targets = self.trans2bhwc_np(all_target)  # b h w c
-        
-        for i in range(inputs.shape[0]):
-            tmp = self.metric(inputs[i,], targets[i,])
-            for key, value in tmp.items():
-                self.cur_metric[key] = self.cur_metric.get(key, 0) + value
+    @state.on_local_main_process
+    def __eval_local__(self, cur_iter, tracker):
+        self.cur_metric = {}
+        for _, data in enumerate(self.test_dataloader):
+            lq, hq = data['lq'], data['hq']
+            lq = lq.to(self.accelerator.device)
+            hq = hq.to(self.accelerator.device)
+            predicted = self.net_g(lq)
+            
+            inputs = self.trans2bhwc_np(predicted)  # b h w c
+            targets = self.trans2bhwc_np(hq)  # b h w c
+            
+            for i in range(inputs.shape[0]):
+                tmp = self.metric(inputs[i,], targets[i,])
+                for key, value in tmp.items():
+                    self.cur_metric[key] = self.cur_metric.get(key, 0) + value
+            
     
-    @on_main_process
+    @torch.no_grad()
+    def __eval_ddp__(self, cur_iter, tracker):
+        self.cur_metric = {}
+        for _, data in enumerate(self.test_dataloader):
+            lq, hq = data['lq'], data['hq']
+            predicted = self.net_g(lq)
+            all_predicted, all_target = self.accelerator.gather_for_metrics((predicted, hq))
+            inputs = self.trans2bhwc_np(all_predicted)  # b h w c
+            targets = self.trans2bhwc_np(all_target)  # b h w c
+            
+            for i in range(inputs.shape[0]):
+                tmp = self.metric(inputs[i,], targets[i,])
+                for key, value in tmp.items():
+                    self.cur_metric[key] = self.cur_metric.get(key, 0) + value
+            
+            
+    # @on_main_process
+    @state.on_local_main_process
     def save_state(self, save_name):
         save_path = os.path.join(self.ckpt_dir, save_name)
         self.accelerator.save_state(save_path, safe_serialization=False)
@@ -159,26 +189,50 @@ class BaseModel(object):
         # save_state_accelerate(accelerator=self.accelerator,
         #                       save_dir=self.ckpt_dir,
         #                       save_name=save_name)
+    
+    @state.on_local_main_process
+    def save_best_net(self, save_name):
+        net_warp = self.accelerator.unwrap_model(self.net_g)
+        path = os.path.join(self.best_ckpt, f"{save_name}.pth")
+        torch.save(net_warp.state_dict(), path)
+        
 
     def get_cur_lr(self):
         return self.optimizer.param_groups[0]['lr']
-
-    @on_main_process
-    def __update_metric__(self, cur_iter):
+    
+    @state.on_local_main_process
+    def __update_metric__(self, cur_iter, tracker):
+        
+        for key, val in self.cur_metric.items():
+            self.cur_metric[key] /= self.test_num
+        
+        print(self.cur_iter, self.test_num)
+        
         flag = False
         self.cur_metric['iter'] = cur_iter
         if self.best_metric.get(self.best_metric_name, 0) < self.cur_metric[self.best_metric_name]:
             self.best_metric = self.cur_metric
             flag = True
 
-        lines = [f'cur_iter : {cur_iter}, cur_lr : {self.get_cur_lr()}']
+        lines = [f'cur_iter : {cur_iter}, cur_learning rate : {self.get_cur_lr():.8f}']
         all_keys = set(self.best_metric.keys()) | set(self.cur_metric.keys())
         max_key_length = max(len(key) for key in all_keys)
 
         for key in self.best_metric.keys():
             best_ = self.best_metric.get(key, 'N/A')
             current_ = self.cur_metric.get(key, 'N/A')
-            lines.append(f"\t \t \t \t \t \t {key:>{max_key_length}} @ best={best_:.4f}, current={current_:.4f}")
-
-        return flag, "\n".join(lines)
+            
+            if 'iter' in key:
+                lines.append(f"\t \t \t \t \t \t {key:>{max_key_length}} @ best={int(best_)}, current={int(current_)}")
+            else:
+                lines.append(f"\t \t \t \t \t \t {key:>{max_key_length}} @ best={best_:.4f}, current={current_:.4f}")
+        
+        
+        is_update = flag
+        info_update =  "\n".join(lines)
+        tracker.log(self.cur_metric, step=cur_iter)
+        tracker.info(msg=info_update)
+        
+        if is_update:
+            self.save_best_net(f"best_{cur_iter}")
 
