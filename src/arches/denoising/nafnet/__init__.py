@@ -7,7 +7,7 @@
 import torch
 import torch.nn as nn
 
-from src.archs.common import PlainUNet
+from src.arches.common import PlainUNet
 
 from src.utils import ARCH_REGISTRY
 

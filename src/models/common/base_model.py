@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 from accelerate.tracking import on_main_process
 
 from src.datasets import get_dataset, ToNdarray_chw2hwc
-from src.archs import get_arch
+from src.arches import get_arch
 from src.loss import get_loss
 from src.metrics import get_metric
 from src.utils.model import (get_optimizer, get_scheduler,

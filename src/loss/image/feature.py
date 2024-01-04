@@ -25,6 +25,7 @@ class TotalVariation(nn.Module):
 
         :param beta:
         """
+        super().__init__()
         self.weight = weight
         self.tv = metric.TotalVariation(reduction=reduction)
 
