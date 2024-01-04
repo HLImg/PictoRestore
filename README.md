@@ -1,28 +1,10 @@
 ## 简单的说明
-
-```py
-├── main.py # 程序启动文件
-├── src
-|   ├── train.py # 训练文件，一般不做改动
-|   ├── arches # 网络结构
-│   │   ├── __init__.py
-|   ├── datasets # 数据类
-│   │   ├── __init__.py
-|   ├── loss # 损失函数
-│   │   ├── __init__.py
-|   ├── metrics # 评价指标
-│   │   ├── __init__.py
-|   ├── models # 根据config.yml初始化训练时所需的元素，并自定义网络训练时的操作
-│   │   ├── __init__.py
-|   ├── utils # 提供各种工具，主要包含上述模块的注册器
-│   │   ├── __init__.py
-```
 1. [train.py](./src/train.py)：主要实现统一的模型训练流程，通过初始化自定义的[models](./src/models/)来实现特定的训练。
 2. [models](./src/models/): 以提供的[基类base_model.py](./src/models/common/base_model.py)为例：
     - 首先将[config.yml](./docs/standard.yml)中的各类超参数提取，例如batch_size, num_worker等。
     - 然后调用上述各个模块中提供的初始化函数对arch, dataset,loss, metric等进行初始化。
     - 接着，使用**accelerate**进行加速配置，注意：如果需要进行分布式评估，那么则对test_dataloader进行accelerate.prepare()操作，另外在定义验证函数时，加上gather_for_metric操作。（在[base_model.py](./src/models/common/base_model.py)提供了类似的操作）
-    ```yml
+    ```yaml
     model:
         name: BaseModel
         batch_size: 4
@@ -104,6 +86,12 @@ metric:
         input_order: CHW
         test_y_channel: False
 ```
+
+**最后，所有的配置将集中在[config.yml](./docs/standard.yml)中，并按照下面的命令启动**
+```shell
+accelerate launch --config_file=docs/single_machine.yml --num_processes=8 main.py --config docs/example_denoise.yml --verbose True --train # num_processes表示单机多卡训练时GPU个数，verbose表示是否在终端现实日志
+```
+
 ## TODO
 - [ ] Test on SIDD with NAFNet with L1 Loss
 - [ ] EMA
@@ -112,96 +100,23 @@ metric:
 
 
 ## The structure of PicToRestore
+```python
+├── main.py # 程序启动文件
+├── src
+|   ├── train.py # 训练文件，一般不做改动
+|   ├── arches # 网络结构
+│   │   ├── __init__.py
+|   ├── datasets # 数据类
+│   │   ├── __init__.py
+|   ├── loss # 损失函数
+│   │   ├── __init__.py
+|   ├── metrics # 评价指标
+│   │   ├── __init__.py
+|   ├── models # 根据config.yml初始化训练时所需的元素，并自定义网络训练时的操作
+│   │   ├── __init__.py
+|   ├── utils # 提供各种工具，主要包含上述模块的注册器
+│   │   ├── __init__.py
 ```
-src
-├── archs
-│   ├── common
-│   │   ├── arch
-│   │   │   ├── __init__.py
-|   |   |   |
-│   │   │   └── unet.py
-│   │   ├── __init__.py
-|   |
-│   ├── denoising
-│   │   ├── __init__.py
-│   │   ├── nafnet
-│   │   │   ├── __init__.py
-|   |
-│   ├── __init__.py
-|   |
-├── datasets
-│   ├── common
-│   │   ├── base_dataset.py
-│   │   ├── __init__.py
-│   │   ├── pair_dataset.py
-|   |   |
-│   │   └── single_dataset.py
-│   ├── image_denoising
-│   │   ├── __init__.py
-|   |   |
-│   │   └── synthetic_noise_rgb.py
-│   ├── __init__.py
-|   |
-│   ├── super_resolution
-│   │   ├── __init__.py
-|   |
-│   └── transforms
-│       ├── augment.py
-│       ├── basics.py
-│       ├── downsample.py
-│       ├── __init__.py
-│       ├── noise.py
-|   
-├── loss
-│   ├── classify
-│   │   ├── __init__.py
-|   |   |
-│   │   └── regular.py
-│   ├── image
-│   │   ├── feature.py
-│   │   ├── __init__.py
-│   │   ├── pixel.py
-|   |
-│   ├── __init__.py
-|   |
-├── metrics
-│   ├── image_recon
-│   │   ├── hsi_image.py
-│   │   ├── __init__.py
-|   |   |
-│   │   └── rgb_image.py
-│   ├── __init__.py
-|   |
-├── models
-│   ├── common
-│   │   ├── base_model.py
-│   │   ├── __init__.py
-|   |
-│   ├── __init__.py
-|   |
-├── train.py
-└── utils
-    ├── image
-    │   ├── hyperspectral.py
-    │   ├── __init__.py
-    │   └── rgb.py
-    ├── __init__.py
-    ├── model
-    │   ├── checkpoint.py
-    │   ├── ema.py
-    │   ├── initializer.py
-    │   ├── __init__.py
-    │   └── tracker.py
-    └── tools
-        ├── dataset.py
-        ├── __init__.py
-        └── registry.py
-```
-**最后，所有的配置将集中在[config.yml](./docs/standard.yml)中，并按照下面的命令启动**
-```shell
-accelerate launch --config_file=docs/single_machine.yml --num_processes=8 main.py --config docs/example_denoise.yml --verbose True --train # num_processes表示单机多卡训练时GPU个数，verbose表示是否在终端现实日志
-```
-
 ## Thanks
 
 部分代码和组织结构参考[BasicSR](https://github.com/XPixelGroup/BasicSR), [MMAction2](https://github.com/open-mmlab/mmaction2)以及其他卓越的工作。
