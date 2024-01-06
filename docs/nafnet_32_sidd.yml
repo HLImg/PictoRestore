@@ -21,7 +21,7 @@ model:
     num_worker: 8
     val_freq: !!float 2e3
     save_freq: !!float 5e3
-    iteration: !!float 2e5
+    iteration: !!float 4e5
     best_metric: psnr_rgb
     gradient_accumulation: 1
     is_eval_ddp: True
@@ -34,7 +34,7 @@ model:
     schedule:
         name: cosine
         num_warmup_steps: 0
-        num_training_steps: !!float 2e5
+        num_training_steps: !!float 4e5
 
 data:
     train:
@@ -80,9 +80,9 @@ loss:
 metric:
     psnr_rgb:
         crop_border: 0
-        input_order: CHW
+        input_order: HWC
         test_y_channel: False
     ssim_rgb:
         crop_border: 0
-        input_order: CHW
+        input_order: HWC
         test_y_channel: False

@@ -9,9 +9,12 @@ import math
 import random
 
 import torch
+import cv2 as cv
 import numpy as np
 
+from skimage import img_as_float32
 from torchvision.utils import make_grid
+
 
 
 class BasicObject:
@@ -20,17 +23,14 @@ class BasicObject:
             return results[0]
         else:
             return results
+    
+    def uint2float32(self, image):
+        return img_as_float32(image)
 
-    def uint8_to_single(self, image):
-        return np.float32(image / 255.)
-
-    def uint16_to_single(self, image):
-        return np.float32(image / 65535.)
-
-    def single2uint8(self, image):
+    def float32_to_uint8(self, image):
         return np.uint8((image.clip(0, 1) * 255.).round())
 
-    def single2uint16(self, image):
+    def float32_to_uint16(self, image):
         return np.uint16((image.clip(0, 1) * 65535.).round())
 
 
@@ -98,7 +98,7 @@ class ToUint8(BasicObject):
     def __call__(self, *images):
         res = []
         for image in images:
-            image = self.single2uint8(image)
+            image = self.float32_to_uint8(image)
             res.append(image)
         return self.return_list(res)
 
@@ -107,7 +107,7 @@ class Uint8ToSingle(BasicObject):
     def __call__(self, *images):
         res = []
         for image in images:
-            image = self.uint8_to_single(image)
+            image = self.uint2float32(image)
             res.append(image)
         return self.return_list(res)
 
@@ -116,7 +116,7 @@ class Uint16ToSingle(BasicObject):
     def __call__(self, *images):
         res = []
         for image in images:
-            image = self.uint16_to_single(image)
+            image = self.uint2float32(image)
             res.append(image)
         return self.return_list(res)
 
@@ -125,13 +125,13 @@ class ToUint16(BasicObject):
     def __call__(self, *images):
         res = []
         for image in images:
-            image = self.single2uint16(image)
+            image = self.float32_to_uint16(image)
             res.append(image)
         return self.return_list(res)
 
 
 class ToImage(BasicObject):
-    def __init__(self, out_type=np.uint8, min_max=(0, 1)):
+    def __init__(self, out_type=np.uint8, min_max=(0, 1), rgb2bgr=True):
         """
         convert torch tensors into image.
         acceptable shapes of converted tensor are :
@@ -143,6 +143,7 @@ class ToImage(BasicObject):
         """
         self.out_type = out_type
         self.min_max = min_max
+        self.rgb2bgr = rgb2bgr
 
     def __call__(self, *tensors):
         res = []
@@ -157,9 +158,15 @@ class ToImage(BasicObject):
             if n_dim == 4:
                 img_np = make_grid(tensor, normalize=False, nrow=int(math.sqrt(tensor.size(0))))
                 img_np = np.transpose(img_np.numpy(), (1, 2, 0))
+                if self.rgb2bgr:
+                    img_np = cv.cvtColor(img_np, cv.COLOR_RGB2BGR)
             elif n_dim == 3:
                 img_np = np.transpose(tensor.numpy(), (1, 2, 0))
-                img_np = img_np.squeeze()
+                if img_np.shape[2] == 1:
+                    img_np = np.squeeze(img_np, axis=2)
+                else:
+                    if self.rgb2bgr:
+                        img_np = cv.cvtColor(img_np, cv.COLOR_RGB2BGR)
             elif n_dim == 2:
                 img_np = tensor.numpy()
             else:

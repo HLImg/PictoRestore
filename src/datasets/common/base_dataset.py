@@ -5,10 +5,10 @@
 # @Email : lianghao@whu.edu.cn
 
 import os
-import cv2
 import lmdb
 import glob
 import random
+import cv2 as cv
 import numpy as np
 import os.path as osp
 import src.datasets.transforms as transforms
@@ -108,8 +108,13 @@ class BaseDataSet(Dataset):
         info = []
         with open(path, 'r') as file:
             for line in file.readlines():
-                line = line.strip().split('-')
-                info.append({'key': line[0].encode(),
+                line = line.strip().split(' ')
+                if len(line) == 3:
+                    info.append({'key': line[0].encode(),
+                                'shape': eval(line[1]),
+                                'flag': int(line[2])})
+                else:
+                    info.append({'key': line[0].encode(),
                              'shape': eval(line[1])})
         return env, info
 
@@ -148,10 +153,18 @@ class BaseDataSet(Dataset):
 
     def get_lmdb_img(self, envs, infos, item):
         with envs.begin(write=False) as txn:
-            buf = txn.get(infos[item]['key'])
-        img_np = np.frombuffer(buf, dtype=self.data_type)
-        img_np = img_np.reshape(infos[item]['shape'])
-        return img_np
+            buf = np.frombuffer(txn.get(infos[item]['key']), dtype=self.data_type)
+            
+        if not infos[item].get('flag', False):
+            image_rgb = buf.reshape(infos[item]['shape'])
+        else:
+            image_bgr = cv.imdecode(buf, flags=infos[item]['flag'])
+            if len(infos[item]['shape']) == 3:
+                image_rgb = image_bgr[:, :, ::-1]
+            else:
+                image_rgb = image_bgr
+            
+        return image_rgb
 
     def get_image(self, params):
         if self.read_mode.lower() == 'lmdb':

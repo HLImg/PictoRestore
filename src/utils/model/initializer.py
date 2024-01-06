@@ -42,3 +42,17 @@ def get_scheduler(optimizer, params):
     params['optimizer'] = optimizer
     params['name'] = params['name'].lower()
     return diffusers.optimization.get_scheduler(**params)
+
+
+def get_scheduler_torch(optimizer, params):
+    name = params.pop('name').lower()
+    params['optimizer'] = optimizer
+    if name.lower() == 'CosineAnnealingLR'.lower():
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(**params)
+    elif name.lower() == 'CosineAnnealingWarmRestarts'.lower():
+        scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(**params)
+    elif name.lower() == 'MultiStepLR'.lower():
+        scheduler = optim.lr_scheduler.MultiStepLR(**params)
+    else:
+        raise ValueError(f"scheduler named {name} is not exits")
+    return scheduler

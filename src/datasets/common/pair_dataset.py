@@ -11,6 +11,8 @@ from .base_dataset import BaseDataSet
 
 from src.utils import DATASET_REGISTRY
 
+from skimage import img_as_float32
+
 @DATASET_REGISTRY.register()
 class PairDataset(BaseDataSet):
     def __init__(self,
@@ -54,9 +56,9 @@ class PairDataset(BaseDataSet):
 
         # define the transformation about data
         self.transform = transforms.Compose([
-            self.trans2float32,
+            transforms.Uint8ToSingle(),
             transforms.RandomCrop(size=patch_size, down_scale=down_scale),
-            self.augment,
+            # self.augment,
             transforms.ToTensor()
         ])
 
@@ -66,6 +68,9 @@ class PairDataset(BaseDataSet):
     def __getitem__(self, item):
         self.hq_params['item'] = item
         self.lq_params['item'] = item
+        
+        # img_hq = img_as_float32(img_hq[:, :, ::-1])
+        # img_lq = img_as_float32(img_lq[:, :, ::-1])
 
         img_hq = self.get_image(self.hq_params)
         img_lq = self.get_image(self.lq_params)

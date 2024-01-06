@@ -66,6 +66,19 @@ data:
             aug_mode: hello
             read_mode: lmdb
 ```
+
+在[base_dataset.py](./src/datasets/common/base_dataset.py)中提供了两种图像读取方式：
+1. disk: 使用PIL进行读取，转成numpy.ndarray，这可以避免opencv读取出错的情况。 **如果给定的目录下有多个子目录，将认为这些子目录代表类别，并同时返回图片的路径和类别**
+2. lmdb: 要求lmdb文件格式如下,其中meta_info.txt存储必要的信息,读取的key,shape(这二者是必须的)。**如果使用cv.imcode进行编码,那么meta_info的第3列必须存在解码flag**.如果不提供，默认使用np.reshape转成图像
+
+注: 默认**cv.imdecode**读出的是BGR，最后get_image返回的是RGB
+```
+val_gt.lmdb
+├── data.mdb
+├── lock.mdb
+└── meta_info.txt
+```
+
 5. [loss](./src/loss/__init__.py)和[metrics](./src/metrics/__init__.py)也使用注册机制，并且支持多个初始化。
 ```yaml
 loss:
@@ -91,6 +104,8 @@ metric:
 ```shell
 accelerate launch --config_file=docs/single_machine.yml --num_processes=8 main.py --config docs/example_denoise.yml --verbose True --train # num_processes表示单机多卡训练时GPU个数，verbose表示是否在终端现实日志
 ```
+
+**以上所有的基类都可以被重写,或者增加新的类,只需要额外引入注册器,并将新增的类导入该模块的__init__.py中即可**
 
 ## TODO
 - [ ] Test on SIDD with NAFNet with L1 Loss

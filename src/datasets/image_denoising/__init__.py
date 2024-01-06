@@ -5,3 +5,4 @@
 # @Email   : lianghao@whu.edu.cn
 
 from .synthetic_noise_rgb import SynRGBNoise
+from .sidd_nafnet import SIDDPairDataset

@@ -5,21 +5,15 @@ run_name: nafnet-base
 hyparams:
     batch_size: 32 # num_gpus x num_nodes x batch_size_per_gpu
     init_lr: 2.e-4
-    patch_size: 238
-    optim_name: Adam
-    optim_weight_decay: 0.
-    optim_beta_1: 1
-    optim_beta_2: 1
-    schedule_name: cosine
-    schedule_num_warmup: 200
-    schedule_num_train: 640000
+    patch_size: 256
+
 
 model:
     name: BaseModel
     batch_size: 4
     num_nodes: 1
     num_worker: 8
-    val_freq: !!float 2e3
+    val_freq: 2e3
     save_freq: !!float 5e3
     iteration: !!float 2e5
     best_metric: psnr_rgb
@@ -27,15 +21,25 @@ model:
     is_eval_ddp: True
 
     optim:
-        name: adam
+        name: AdamW
         param:
             lr: 2.e-4
             weight_decay: 0.
-            betas: [0.9, 0.99]
+            betas: [0.9, 0.9]
     schedule:
-        name: cosine
-        num_warmup_steps: 200
-        num_training_steps: 640000
+        # Supports torch.optim.lr_scheduler without warmup and diffusers.optimization.get_scheduler with warmup
+        # diffusers.optimization with warmup
+        # Note: The step count is defined per GPU.
+
+        # name: cosine
+        # num_warmup_steps: 0
+        # num_training_steps: !!float 4e5
+
+       # When using torch.optim.lr_scheduler without warmup,
+       # remember that the step count must account for the number of GPUs in use.
+        name: CosineAnnealingLR
+        T_max : 3200000 # 4e5 x 8 (the number of gpus)
+        eta_min : 1.e-7
 
 data:
     train:

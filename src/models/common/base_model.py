@@ -1,32 +1,91 @@
-# -*- coding: utf-8 -*-
-# @Time : 2023/12/31
-# @Author : Liang Hao
-# @FileName : base_model
-# @Email : lianghao@whu.edu.cn
-
 import os
 import math
 import torch
 import logging
 import coloredlogs
+import numpy as np
 
 from torch.utils.data import DataLoader
 from accelerate.tracking import on_main_process
 
-from src.datasets import get_dataset, ToNdarray_chw2hwc
+from src.datasets import get_dataset, ToImage
 from src.arches import get_arch
 from src.loss import get_loss
 from src.metrics import get_metric
-from src.utils.model import (get_optimizer, get_scheduler,
+from src.utils.model import (get_optimizer, get_scheduler, 
+                             get_scheduler_torch,
                              load_state_accelerate,
                              save_state_accelerate)
 from src.utils import MODEL_REGISTRY
+
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level=logging.INFO)
 
 from accelerate.state import PartialState
 state = PartialState()
+
+# import cv2 
+# import math
+# import numpy as np
+# from torchvision.utils import make_grid
+# def tensor2img(tensor, rgb2bgr=True, out_type=np.uint8, min_max=(0, 1)):
+#     """Convert torch Tensors into image numpy arrays.
+
+#     After clamping to [min, max], values will be normalized to [0, 1].
+
+#     Args:
+#         tensor (Tensor or list[Tensor]): Accept shapes:
+#             1) 4D mini-batch Tensor of shape (B x 3/1 x H x W);
+#             2) 3D Tensor of shape (3/1 x H x W);
+#             3) 2D Tensor of shape (H x W).
+#             Tensor channel should be in RGB order.
+#         rgb2bgr (bool): Whether to change rgb to bgr.
+#         out_type (numpy type): output types. If ``np.uint8``, transform outputs
+#             to uint8 type with range [0, 255]; otherwise, float type with
+#             range [0, 1]. Default: ``np.uint8``.
+#         min_max (tuple[int]): min and max values for clamp.
+
+#     Returns:
+#         (Tensor or list): 3D ndarray of shape (H x W x C) OR 2D ndarray of
+#         shape (H x W). The channel order is BGR.
+#     """
+#     if not (torch.is_tensor(tensor) or (isinstance(tensor, list) and all(torch.is_tensor(t) for t in tensor))):
+#         raise TypeError(f'tensor or list of tensors expected, got {type(tensor)}')
+
+#     if torch.is_tensor(tensor):
+#         tensor = [tensor]
+#     result = []
+#     for _tensor in tensor:
+#         _tensor = _tensor.squeeze(0).float().detach().cpu().clamp_(*min_max)
+#         _tensor = (_tensor - min_max[0]) / (min_max[1] - min_max[0])
+
+#         n_dim = _tensor.dim()
+#         if n_dim == 4:
+#             img_np = make_grid(_tensor, nrow=int(math.sqrt(_tensor.size(0))), normalize=False).numpy()
+#             img_np = img_np.transpose(1, 2, 0)
+#             if rgb2bgr:
+#                 img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+#         elif n_dim == 3:
+#             img_np = _tensor.numpy()
+#             img_np = img_np.transpose(1, 2, 0)
+#             if img_np.shape[2] == 1:  # gray image
+#                 img_np = np.squeeze(img_np, axis=2)
+#             else:
+#                 if rgb2bgr:
+#                     img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+#         elif n_dim == 2:
+#             img_np = _tensor.numpy()
+#         else:
+#             raise TypeError(f'Only support 4D, 3D or 2D tensor. But received with dimension: {n_dim}')
+#         if out_type == np.uint8:
+#             # Unlike MATLAB, numpy.unit8() WILL NOT round by default.
+#             img_np = (img_np * 255.0).round()
+#         img_np = img_np.astype(out_type)
+#         result.append(img_np)
+#     if len(result) == 1:
+#         result = result[0]
+#     return result
 
 
 @MODEL_REGISTRY.register()
@@ -84,9 +143,16 @@ class BaseModel(object):
             )
 
         else:
-            config['model']['schedule']['num_warmup_steps'] *= self.num_gpu * self.num_nodes
-            config['model']['schedule']['num_training_steps'] *= self.num_gpu * self.num_nodes
-            self.scheduler = get_scheduler(optimizer=self.optimizer,
+            if not config['model']['schedule'].get('num_warmup_steps', False) and \
+                not config['model']['schedule'].get('num_training_steps', False):
+                self.scheduler = get_scheduler_torch(optimizer=self.optimizer,
+                                           params=config['model']['schedule']) 
+            else:
+                config['model']['schedule']['num_warmup_steps'] = \
+                    config['model']['schedule'].get('num_warmup_steps', '0') * self.num_gpu * self.num_nodes
+                config['model']['schedule']['num_training_steps'] = \
+                    config['model']['schedule'].get('num_training_steps', 0) * self.num_gpu * self.num_nodes
+                self.scheduler = get_scheduler(optimizer=self.optimizer,
                                            params=config['model']['schedule'])
 
         # loss function
@@ -128,7 +194,8 @@ class BaseModel(object):
         self.cur_iter = resume_info['last_epoch'] + 1 if resume_info is not None else 0
         self.start_epoch = math.ceil(self.cur_iter / iters_per_epoch)
         self.end_epoch = math.ceil(self.total_iters / iters_per_epoch)
-        self.trans2bhwc_np = ToNdarray_chw2hwc()
+        
+        self.tensor2image = ToImage(out_type=np.uint8, rgb2bgr=True, min_max=(0, 1))
 
         self.cur_metric = {}
         self.best_metric = {}
@@ -171,11 +238,17 @@ class BaseModel(object):
             lq, hq = data['lq'], data['hq']
             predicted = self.net_g(lq)
             all_predicted, all_target = self.accelerator.gather_for_metrics((predicted, hq))
-            inputs = self.trans2bhwc_np(all_predicted)  # b h w c
-            targets = self.trans2bhwc_np(all_target)  # b h w c
+            # inputs = self.trans2bhwc_np(all_predicted)  # b h w c
+            # targets = self.trans2bhwc_np(all_target)  # b h w c
             
-            for i in range(inputs.shape[0]):
-                tmp = self.metric(inputs[i,], targets[i,])
+            # for i in range(inputs.shape[0]):
+            #     tmp = self.metric(inputs[i,], targets[i,])
+            #     for key, value in tmp.items():
+            #         self.cur_metric[key] = self.cur_metric.get(key, 0) + value
+            
+            for i in range(all_predicted.shape[0]):
+                tmp = self.metric(self.tensor2image(all_predicted[i,]), 
+                                  self.tensor2image(all_target[i,]))
                 for key, value in tmp.items():
                     self.cur_metric[key] = self.cur_metric.get(key, 0) + value
             

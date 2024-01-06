@@ -21,9 +21,9 @@ class PSNR_RGB:
         assert input.dtype == target.dtype, f"the dtypes of input and target are different."
         assert isinstance(input, np.ndarray) and isinstance(target, np.ndarray), f"input and target must be np.nadarray, and shape is (h, w, c)"
         
-        if input.dtype == "float64" or input.dtype == "float32":
-            input = (input.clip(0, 1) * 255.).astype("uint8")
-            target = (target.clip(0, 1) * 255.).astype("uint8")
+        # if input.dtype == "float64" or input.dtype == "float32":
+        #     input = (input.clip(0, 1) * 255.).astype("uint8")
+        #     target = (target.clip(0, 1) * 255.).astype("uint8")
             
         return calculate_psnr(img1=input,
                               img2=target,

@@ -4,4 +4,4 @@
 # @FileName : __init__.py
 # @Email : lianghao@whu.edu.cn
 
-from .nafnet import NAFNet
+from .nafnet import NAFNet, NAFNetSame

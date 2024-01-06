@@ -1,6 +1,6 @@
 seed: 10
 exp_dir: results
-run_name: nafnet-sidd-wf-32
+run_name: nafnet-sidd-wf32-CVData
 
 hyparams:
     batch_size: 32 # num_gpus x num_nodes x batch_size_per_gpu
@@ -21,7 +21,7 @@ model:
     num_worker: 8
     val_freq: !!float 2e3
     save_freq: !!float 5e3
-    iteration: !!float 2e5
+    iteration: !!float 4e5
     best_metric: psnr_rgb
     gradient_accumulation: 1
     is_eval_ddp: True
@@ -32,36 +32,17 @@ model:
             weight_decay: 0.
             betas: [0.9, 0.9]
     schedule:
-        name: cosine
-        num_warmup_steps: 0
-        num_training_steps: !!float 2e5
+        name: CosineAnnealingLR
+        T_max : 3200000 # 单卡 4e5 x 8 (gpu个数)
+        eta_min : 1.e-7
 
-# data:
-#     train:
-#         name: PairDataset
-#         param:
-#             lq_path: /data/dataset/low_level/sidd/train_noisy.lmdb
-#             hq_path: /data/dataset/low_level/sidd/train_gt.lmdb
-#             down_scale: 1
-#             patch_size: 256
-#             aug_mode: ~
-#             read_mode: lmdb
-#     test:
-#         name: PairDataSet
-#         param:
-#             lq_path: /data/dataset/low_level/sidd/val_noisy.lmdb
-#             hq_path: /data/dataset/low_level/sidd/val_gt.lmdb
-#             down_scale: 1
-#             patch_size: -1
-#             aug_mode: ~
-#             read_mode: lmdb
 
 data:
     train:
         name: PairDataset
         param:
-            lq_path: /data/dataset/low_level/sidd/train_noisy.lmdb
-            hq_path: /data/dataset/low_level/sidd/train_gt.lmdb
+            lq_path: /data/dataset/low_level/sidd_tmp/train_noisy.lmdb
+            hq_path: /data/dataset/low_level/sidd_tmp/train_gt.lmdb
             down_scale: 1
             patch_size: 256
             aug_mode: ~
@@ -69,12 +50,32 @@ data:
     test:
         name: PairDataSet
         param:
-            lq_path: /data/dataset/low_level/sidd/val_noisy.lmdb
-            hq_path: /data/dataset/low_level/sidd/val_gt.lmdb
+            lq_path: /data/dataset/low_level/sidd_tmp/val_noisy.lmdb
+            hq_path: /data/dataset/low_level/sidd_tmp/val_gt.lmdb
             down_scale: 1
             patch_size: -1
             aug_mode: ~
             read_mode: lmdb
+
+data:
+    train:
+        name: SIDDPairDataset
+        param:
+            lq_path: /data/dataset/low_level/sidd_tmp//train_noisy.lmdb
+            hq_path: /data/dataset/low_level/sidd_tmp//train_gt.lmdb
+            patch_size: 256
+            scale: 1
+            flip: False
+            rotation: False
+            read_mode: lmdb
+    test:
+        name: SIDDPairDataset
+        param:
+            lq_path: /data/dataset/low_level/sidd_tmp//val_noisy.lmdb
+            hq_path: /data/dataset/low_level/sidd_tmp//val_gt.lmdb
+            read_mode: lmdb
+
+
 
 
 arch:
@@ -92,17 +93,18 @@ arch:
                 drop_rate: 0.
 
 loss:
-    l1:
+    PSNRLoss:
         weight: 1.
         reduction: mean
+        toY: False
 
 
 metric:
     psnr_rgb:
         crop_border: 0
-        input_order: CHW
+        input_order: HWC
         test_y_channel: False
     ssim_rgb:
         crop_border: 0
-        input_order: CHW
+        input_order: HWC
         test_y_channel: False
