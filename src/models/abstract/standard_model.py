@@ -35,10 +35,18 @@ class StandardModel(BaseModel):
     def __init__(self, config, accelerator):
         super().__init__(config, accelerator)
         
+        """Necessary Setting"""
         self.__parser__(config)
         self.__build__(config)
         self.__prepare__()
         self.auto_resume(config)
+        
+        iters_per_epoch = math.ceil(self.num_train / (self.batch_size * self.num_gpu * self.num_nodes))
+        self.cur_iter = self.resume_info['last_epoch'] + 1 if self.resume_info is not None else 0
+        self.start_epoch = math.ceil(self.cur_iter / iters_per_epoch)
+        self.end_epoch = math.ceil(self.total_iters / iters_per_epoch)
+        
+        """Other Setting"""
         
         self.tensor2image = ToImage(out_type=np.uint8, min_max=(0, 1), rgb2bgr=True)
         
@@ -48,7 +56,9 @@ class StandardModel(BaseModel):
         self.criterion = build_loss(config)
         
         self.optimizer = get_optimizer(self.net, config=config)
-        self.scheduler = get_scheduler(self.optimizer, num_gpu=self.num_gpu, num_nodes=self.num_nodes)
+        self.scheduler = get_scheduler(
+            self.optimizer, config=config, num_gpu=self.num_gpu, num_nodes=self.num_nodes
+        )
         
         datasets = build_dataset(config=config)
         
@@ -76,7 +86,7 @@ class StandardModel(BaseModel):
         
         if not self.main_process_only:
             logger.warning(f"[{self.device}]: Distributed Evaluation: All test data must have identical shapes.")
-            self.dataloader_test = self.accelerator.prepare(self.dataloader_test)
+            self.loader_test = self.accelerator.prepare(self.loader_test)
         else:
             logger.warning(f"[{self.device}]: Evaluate Exclusively on the (Local) Main Process")
         
@@ -114,7 +124,7 @@ class StandardModel(BaseModel):
     def __reset__(self):
         self.train_loss = 0
     
-    def __feed__(self, idx, data, pabr, tracker):
+    def __feed__(self, idx, data, pbar, tracker):
         with self.accelerator.accumulate(self.net):
             self.optimizer.zero_grad()
             lq, hq = data['lq'], data['hq']
@@ -125,10 +135,10 @@ class StandardModel(BaseModel):
             self.scheduler.step()
         
         self.cur_iter = self.cur_iter + 1
-        pabr.set_postfix(loss=loss.item())
+        pbar.set_postfix(loss=loss.item())
         
         if self.cur_iter % self.train_freq == 0:
-            tracker.log(values={loss: loss.item()}, step=self.cur_iter + 1)
+            tracker.log(values={'train/loss': loss.item()}, step=self.cur_iter + 1)
         
 
     @on_main_process

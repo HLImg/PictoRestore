@@ -26,19 +26,19 @@ def train(model, tracker):
     model.accelerator.wait_for_everyone()
 
     for epoch in range(model.start_epoch, model.end_epoch):
-        loop_train = tqdm(model.dataloader_train,
+        loop_train = tqdm(model.loader_train,
                           desc='training',
                           disable=not state.is_main_process)
 
         model.net.train()
-        model.__zero__()
-
+        model.__reset__()
+        
         for idx, data in enumerate(loop_train, 0):
             loop_train.set_description(f"[Epoch: {epoch} / {model.end_epoch}]")
 
             model.__feed__(idx=idx,
                            data=data,
-                           loop_train=loop_train,
+                           pbar=loop_train,
                            tracker=tracker)
 
             if model.num_test > 0 and model.cur_iter % model.test_freq == 0:

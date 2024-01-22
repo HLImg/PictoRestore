@@ -34,11 +34,10 @@ class BaseModel(object):
     
     @abstractmethod
     def __prepare__(self):
-        pass
-    
+        pass  
     
     @abstractmethod
-    def __feed__(self,idx, data, pabr, tracker):
+    def __feed__(self,idx, data, pbar, tracker):
         pass
     
     @abstractmethod
