@@ -10,6 +10,7 @@ import argparse
 import src.train as trainer
 
 from accelerate import Accelerator
+from accelerate.utils import DistributedDataParallelKwargs
 
 from src.utils import set_seed
 
@@ -27,9 +28,11 @@ args = parser.parse_args()
 
 with open(args.config, 'r') as file:
     config = yaml.safe_load(file)
-
+    
+kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 accelerator = Accelerator(
-    gradient_accumulation_steps=config['model']['gradient_accumulation']
+    gradient_accumulation_steps=config['model']['gradient_accumulation'], 
+    kwargs_handlers=[kwargs]
 )
 
 set_seed(config['seed'])

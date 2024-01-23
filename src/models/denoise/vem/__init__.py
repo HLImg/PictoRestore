@@ -4,3 +4,4 @@
 # @FileName : __init__.py
 # @Email : lianghao@whu.edu.cn
 
+from .vemodel import VEMModel

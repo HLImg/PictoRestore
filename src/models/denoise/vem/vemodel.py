@@ -25,6 +25,7 @@ coloredlogs.install(level=logging.INFO)
 @MODEL_REGISTRY.register()
 class VEMModel(StandardModel):
     def __init__(self, config, accelerator):
+        super().__init__(config=config, accelerator=accelerator)
         self.config = config
         self.accelerator = accelerator
         

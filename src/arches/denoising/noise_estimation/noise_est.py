@@ -26,7 +26,7 @@ class ResidualGroup(nn.Module):
                  pool=False,
                  pool_mode='conv',
                  ):
-        
+        super().__init__()
         if blk_name.lower() == 'ssct':
             block = SSCT
         else:

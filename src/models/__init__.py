@@ -5,6 +5,7 @@
 # @Email : lianghao@whu.edu.cn
 
 from .abstract import *
+from .denoise import *
 
 from src.utils import MODEL_REGISTRY
 

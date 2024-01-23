@@ -53,7 +53,7 @@ def get_scheduler(optimizer, config, num_gpu=1, num_nodes=1):
             optimizer, step_size=1000000, gamma=1
         )
     else:
-        params = config['model']['schedule']
+        params = config['model']['schedule'].copy()
         if not isinstance(params, dict):
             raise TypeError('params must be a dict')
 
