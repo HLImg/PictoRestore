@@ -49,7 +49,7 @@ class StandardModel(BaseModel):
         """Other Setting"""
         
         self.tensor2image = ToImage(out_type=np.uint8, min_max=(0, 1), rgb2bgr=True)
-        
+    
     def __build__(self, config):
         self.net = build_arch(config)
         self.metric = build_metric(config)

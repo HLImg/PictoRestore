@@ -29,7 +29,7 @@ class VEMIDNet(nn.Module):
                 est_sigma = self.net_theta(x)
                 est_sigma = est_sigma.detach()
             est_x = self.net_phi(est_sigma + x)
-            return est_x
+            return est_x, est_sigma
         elif step.upper() == 'M':
             est_sigma = self.net_theta(x)
             with torch.no_grad():

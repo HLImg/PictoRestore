@@ -39,8 +39,13 @@ class SimuteNIDDGaussian(Dataset):
         self.sigma_idd = sigma_iid
 
         self.im_list = [path for path in glob.glob(os.path.join(hq_path, '*'))]
-
+        
+        self.random = True
         self.length = length
+        if not length:
+            self.length = len(self.im_list) 
+            self.random = False
+        
 
         self.num_images = len(self.im_list)
 
@@ -95,7 +100,10 @@ class SimuteNIDDGaussian(Dataset):
         return pch
 
     def __getitem__(self, item):
-        ind_im = random.randint(0, self.num_images - 1)
+        if self.random:
+            ind_im = random.randint(0, self.num_images - 1)
+        else:
+            ind_im = item
         im_ori = cv2.imread(self.im_list[ind_im], 1)[:, :, ::-1]
         im_gt = img_as_float32(self.crop_patch(im_ori))
         C = im_gt.shape[2]

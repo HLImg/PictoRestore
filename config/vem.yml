@@ -1,0 +1,109 @@
+seed: 10
+root_dir: results
+run_name: vem_wf_32
+
+
+model:
+    name: StandardModel
+    num_nodes: 1
+    train_freq: 50
+    test_freq: 2000
+    save_freq: !!float 5e3
+    iteration: !!float 4e5
+    gradient_accumulation: 1
+
+    best_metric: 
+        name: psnr_rgb
+        value: 28
+
+    loader:
+        train:
+            batch_size: 4
+            shuffle: True
+            num_workers: 2
+        test:
+            batch_size: 1
+            shuffle: False
+            num_workers: 2
+
+    optim:
+        name: AdamW
+        param:
+            lr: 2.e-4
+            weight_decay: 0.
+            betas: [0.9, 0.99]
+
+    schedule:
+        name: CosineAnnealingLR
+        T_max : 3200000 # 单卡 4e5 x 8 (gpu个数)
+        eta_min : 1.e-7
+
+data:
+    train:
+        name: SimuteNIDDGaussian
+        param:
+            hq_path: /data/dataset/low_level/lsdir/
+            length: 50000
+            patch_size: 128
+            augment: False
+            sigma_min: 0
+            sigma_max: 75
+            sigma_iid: [10, 25, 30, 50, 70]
+    test:
+        name: VDNSimuTest
+        param:
+            lmdb_path: /data/dataset/low_level/test_dataset/NiidGauss/CBSD68_allcase.lmdb
+
+arch:
+    name: VEMIDNet
+    noise_est_param:
+        in_ch: 3
+        num_groups: [4, 3, 2]
+        num_feats: 32
+        head_dim_s: 32
+        head_num_c: 4
+        winsize: 8
+        mlp_ratio_s: 4
+        mlp_ratio_c: 4
+        drop_rate: 0.1
+        bias: False
+        pool: False
+        pool_mode: conv
+        blk_name: ssct
+    noise_rm_param:
+        in_ch: 3
+        num_feats: 32
+        num_feats : 32
+        num_enc_blk: [2, 2, 2]
+        num_mid_blk: 2
+        num_dec_blk: [2, 2, 2]
+        blk_name : ssct
+        blk_param :
+            head_dim_s: 32
+            head_num_c: 4
+            winsize: 8
+            mlp_ratio_s: 2
+            mlp_ratio_c: 2
+            drop_prob_s: 0.1
+            drop_prob_c: 0.1
+            bias: False
+            pool: False
+            pool_mode: conv
+            shortcut_prob: 0.5
+
+loss:
+    PSNRLoss:
+        weight: 1.
+        reduction: mean
+        toY: False
+
+
+metric:
+    psnr_rgb:
+        crop_border: 0
+        input_order: HWC
+        test_y_channel: False
+    ssim_rgb:
+        crop_border: 0
+        input_order: HWC
+        test_y_channel: False
