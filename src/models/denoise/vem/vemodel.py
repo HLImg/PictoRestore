@@ -122,9 +122,11 @@ class VEMModel(StandardModel):
         est_loss = 0.
         for _, data in enumerate(self.loader_test):
             lq, hq, sigma = data['lq'], data['hq'], data['sigma']
-            denoise, est_sigma = self.net(lq, mode='')
+            
+            denoise, est_sigma = self.net(lq, step='E')
             
             if not self.main_process_only:
+                sigma, est_sigma = self.accelerator.gather_for_metrics((sigma, est_sigma))
                 denoise, hq = self.accelerator.gather_for_metrics((denoise, hq))
             
             est_loss += F.mse_loss(est_sigma, sigma, reduction='sum')

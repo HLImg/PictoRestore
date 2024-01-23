@@ -101,10 +101,13 @@ class SCTUnet(BaseUnet):
     def __init__(self, in_ch, num_feats, num_enc_blk=[2, 2], num_mid_blk=2, num_dec_blk=[2, 2], blk_name=None, blk_param=None):
         super(SCTUnet, self).__init__(in_ch, num_feats, num_enc_blk, num_mid_blk, num_dec_blk, blk_name, blk_param)
         
+        self.pad_size = self.pad_size * blk_param['winsize']
     
     def __block__(self, blk_name):
         if blk_name.lower() == 'psct':
             return PSCT
         elif blk_name.lower() == 'ssct':
             return SSCT
-        
+    
+    def check_image_size(self, x):
+        return super().check_image_size(x)
