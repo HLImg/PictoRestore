@@ -5,3 +5,4 @@
 # @Email : lianghao@whu.edu.cn
 
 from .backbone import VEMIDNet
+from .pretrain_dncnn_unet import VEMDNet
