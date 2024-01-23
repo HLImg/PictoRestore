@@ -6,3 +6,4 @@
 
 from .nafnet import *
 from .spatial_channel import *
+from .noise_estimation import *
