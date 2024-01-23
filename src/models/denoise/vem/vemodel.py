@@ -86,7 +86,7 @@ class VEMModel(StandardModel):
     
     
     def __feed__(self, idx, data, pbar, tracker):
-        if (self.cur_iter + 1) % 2 == True:
+        if (self.cur_iter + 1) % 2 == 0:
             # E-Step
             self.optimizer_phi.zero_grad()
             lq, hq, sigma = data['lq'], data['hq'], data['sigma']
@@ -98,6 +98,7 @@ class VEMModel(StandardModel):
             
             if (self.cur_iter + 1) % 50 == 0:
                 tracker.log(values={'train/loss_den': loss_den.item()}, step=self.cur_iter + 1)
+            
             
         else:
             # M-Step
