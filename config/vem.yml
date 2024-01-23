@@ -36,7 +36,7 @@ model:
     schedule:
         name: CosineAnnealingLR
         T_max : 3200000 # 单卡 4e5 x 8 (gpu个数)
-        eta_min : 1.e-7
+        eta_min : 1.e-6
 
 data:
     train:
@@ -46,7 +46,7 @@ data:
             length: 50000
             patch_size: 128
             augment: False
-            sigma_min: 10
+            sigma_min: 0
             sigma_max: 75
             sigma_iid: [10, 25, 30, 50, 70]
     test:
@@ -73,7 +73,6 @@ arch:
     noise_rm_param:
         in_ch: 3
         num_feats: 32
-        num_feats : 32
         num_enc_blk: [2, 2, 2]
         num_mid_blk: 2
         num_dec_blk: [2, 2, 2]

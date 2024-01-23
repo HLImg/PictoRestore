@@ -45,6 +45,8 @@ def train(model, tracker):
                 model.net.eval()
                 model.__eval__(tracker=tracker)
                 model.net.train()
+                if model.main_process_only:
+                    model.accelerator.wait_for_everyone()
 
             if model.cur_iter % model.save_freq == 0:
                 model.save_state(save_name=f"save_state_{model.cur_iter}")
