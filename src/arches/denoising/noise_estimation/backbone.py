@@ -39,3 +39,19 @@ class VEMIDNet(nn.Module):
         elif step.upper() == 'PM':
             est_sigma = self.net_theta(x)
             return est_sigma
+        
+
+@ARCH_REGISTRY.register()
+class VEMIDNetPreTrain(nn.Module):
+    def __init__(self, 
+                 noise_est_param,
+                 noise_rm_param):
+        super().__init__()
+        
+        self.net_theta = RIRNet(**noise_est_param)
+        self.net_phi = SCTUnet(**noise_rm_param)
+        
+    def forward(self, x):
+        phi_x = self.net_phi(x)
+        theta_sigma = self.net_theta(x)
+        return phi_x, theta_sigma

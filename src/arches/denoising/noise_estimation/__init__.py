@@ -4,5 +4,5 @@
 # @FileName : __init__.py
 # @Email : lianghao@whu.edu.cn
 
-from .backbone import VEMIDNet
-from .pretrain_dncnn_unet import VEMDNet
+from .backbone import VEMIDNet, VEMIDNetPreTrain
+from .pretrain_dncnn_unet import VEMDNet, VEMDNetConCat

@@ -1,15 +1,15 @@
 seed: 2017
 root_dir: results
-run_name: pretrian_vdn_concat
+run_name: VEModelPretrain-SSCT
 
 
 model:
-    name: VEMModel
+    name: VEModelPretrain
     num_nodes: 1
     train_freq: 50
     test_freq: 2000
     save_freq: !!float 5e3
-    iteration: !!float 4e5
+    iteration: !!float 8e5
     gradient_accumulation: 1
 
     best_metric: 
@@ -18,9 +18,9 @@ model:
 
     loader:
         train:
-            batch_size: 64
+            batch_size: 4
             shuffle: True
-            num_workers: 8
+            num_workers: 2
         test:
             batch_size: 1
             shuffle: False
@@ -36,8 +36,7 @@ model:
     schedule:
         name: cosine
         num_warmup_steps: 0
-        num_training_steps: !!float 4e5
-
+        num_training_steps: !!float 8e5
 
 data:
     train:
@@ -48,7 +47,7 @@ data:
             patch_size: 128
             augment: true
             sigma_min: 10
-            sigma_max: 70
+            sigma_max: 75
             sigma_iid: [10, 25, 30, 40, 50, 70, 75]
     test:
         name: VDNSimuTest
@@ -56,16 +55,45 @@ data:
             lmdb_path: /data/dataset/low_level/test_dataset/NiidGauss/CBSD68_allcase.lmdb
 
 arch:
-    name: VEMDNetConCat
-    pretrian_dncnn: True
-    pretrain_unet: False
-    pretrain: /data/workspace/master_paper/PictoRestore/results/VDN-WED-Est2/best_ckpt/best_375001.pth
+    name: VEMIDNetPreTrain
+    noise_est_param:
+        in_ch: 3
+        num_groups: [4, 3, 2]
+        num_feats: 32
+        head_dim_s: 32
+        head_num_c: 4
+        winsize: 8
+        mlp_ratio_s: 4
+        mlp_ratio_c: 4
+        drop_rate: 0.1
+        bias: False
+        pool: False
+        pool_mode: conv
+        blk_name: ssct
+    noise_rm_param:
+        in_ch: 3
+        num_feats: 32
+        num_enc_blk: [2, 2, 2]
+        num_mid_blk: 2
+        num_dec_blk: [2, 2, 2]
+        blk_name : ssct
+        blk_param :
+            head_dim_s: 32
+            head_num_c: 4
+            winsize: 8
+            mlp_ratio_s: 2
+            mlp_ratio_c: 2
+            drop_prob_s: 0.002
+            drop_prob_c: 0.002
+            bias: False
+            pool: False
+            pool_mode: conv
+            shortcut_prob: 0.01
 
 loss:
-    PSNRLoss:
+    mse:
         weight: 1.
         reduction: mean
-        toY: False
 
 
 metric:

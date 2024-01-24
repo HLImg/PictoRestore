@@ -5,3 +5,4 @@
 # @Email : lianghao@whu.edu.cn
 
 from .vemodel import VEMModel
+from .pretrain import VEModelPretrain

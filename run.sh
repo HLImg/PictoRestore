@@ -4,4 +4,6 @@
 
 # accelerate launch --config_file=tools/single_acc.yml --num_processes=8 main.py --config config/vem.yml --eval_ddp False --verbose True --train 
 
-accelerate launch --config_file=tools/single_acc.yml --num_processes=1 main.py --config config/pretrain_vdn.yml --eval_ddp False --verbose True --train 
+# accelerate launch --config_file=tools/single_acc.yml --num_processes=1 main.py --config config/pretrain_vdn.yml --eval_ddp False --verbose True --train 
+
+accelerate launch --config_file=tools/single_acc.yml --num_processes=8 main.py --config config/pretrain_vem.yml --eval_ddp False --verbose True --train 
