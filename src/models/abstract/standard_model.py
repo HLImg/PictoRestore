@@ -32,8 +32,8 @@ coloredlogs.install(level=logging.INFO)
 
 @MODEL_REGISTRY.register()
 class StandardModel(BaseModel):
-    def __init__(self, config, accelerator):
-        super().__init__(config, accelerator)
+    def __init__(self, config, accelerator, main_process_only):
+        super().__init__(config, accelerator, main_process_only)
         
         """Necessary Setting"""
         self.__parser__(config)
@@ -84,6 +84,7 @@ class StandardModel(BaseModel):
             self.net, self.optimizer, self.scheduler, self.loader_train, self.criterion
         )
         
+        logger.warning(f"main_process_only : {self.main_process_only}")
         if not self.main_process_only:
             logger.warning(f"[{self.device}]: Distributed Evaluation: All test data must have identical shapes.")
             self.loader_test = self.accelerator.prepare(self.loader_test)
@@ -147,6 +148,11 @@ class StandardModel(BaseModel):
         metric = defaultdict(float)
         for _, data in enumerate(self.loader_test):
             lq, hq = data['lq'], data['hq']
+            
+            if self.main_process_only:
+                lq = lq.to(self.device)
+                hq = hq.to(self.device)
+            
             denoise = self.net(lq)
             
             if not self.main_process_only:

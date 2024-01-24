@@ -9,11 +9,12 @@ from .denoise import *
 
 from src.utils import MODEL_REGISTRY
 
-def build_model(accelerator, config):
+def build_model(accelerator, config, main_process_only=False):
     name = config['model']['name']
     params = dict(
         accelerator = accelerator,
-        config = config
+        config = config,
+        main_process_only=main_process_only
     )
     
     return MODEL_REGISTRY.get_obj(name)(**params)

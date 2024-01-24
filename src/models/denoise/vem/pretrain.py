@@ -24,8 +24,10 @@ coloredlogs.install(level=logging.INFO)
 
 @MODEL_REGISTRY.register()
 class VEModelPretrain(StandardModel):
-    def __init__(self, config, accelerator):
-        super().__init__(config, accelerator)
+    def __init__(self, config, accelerator, main_process_only):
+        super().__init__(config, accelerator, main_process_only)
+        
+        logger.warning(f"main_process_only init: {self.main_process_only}")
         
     def __feed__(self, idx, data, pbar, tracker):
         with self.accelerator.accumulate(self.net):
@@ -57,10 +59,12 @@ class VEModelPretrain(StandardModel):
     @torch.no_grad()
     def __eval__(self, tracker):
         metric = defaultdict(float)
-
         for _, data in enumerate(self.loader_test):
             lq, hq, sigma = data['lq'], data['hq'], data['sigma']
-            
+            if self.main_process_only:
+                lq, hq = lq.to(self.device), hq.to(self.device)
+                sigma = sigma.to(self.device)
+        
             denoise, est_sigma = self.net(lq)
             
             if not self.main_process_only:

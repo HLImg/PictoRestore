@@ -12,9 +12,10 @@ class BaseModel(object):
     main_process_only = False
     
     @abstractmethod
-    def __init__(self, config, accelerator):
+    def __init__(self, config, accelerator, main_process_only):
         self.config = config
         self.accelerator = accelerator
+        self.main_process_only = main_process_only
         
         self.cur_iter = 0
         

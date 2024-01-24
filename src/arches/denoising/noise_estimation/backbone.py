@@ -41,6 +41,8 @@ class VEMIDNet(nn.Module):
             return est_sigma
         
 
+from .pretrain_dncnn_unet import DnCNN, UNet
+
 @ARCH_REGISTRY.register()
 class VEMIDNetPreTrain(nn.Module):
     def __init__(self, 
@@ -48,8 +50,10 @@ class VEMIDNetPreTrain(nn.Module):
                  noise_rm_param):
         super().__init__()
         
-        self.net_theta = RIRNet(**noise_est_param)
-        self.net_phi = SCTUnet(**noise_rm_param)
+        # self.net_theta = RIRNet(**noise_est_param)
+        # self.net_phi = SCTUnet(**noise_rm_param)
+        self.net_theta = DnCNN(3, 3, dep=5, num_filters=64, slope=0.2)
+        self.net_phi = UNet(3, 3, wf=64, depth=4, slope=0.2)
         
     def forward(self, x):
         phi_x = self.net_phi(x)

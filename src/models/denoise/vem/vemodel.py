@@ -24,8 +24,8 @@ coloredlogs.install(level=logging.INFO)
 
 @MODEL_REGISTRY.register()
 class VEMModel(StandardModel):
-    def __init__(self, config, accelerator):
-        super().__init__(config=config, accelerator=accelerator)
+    def __init__(self, config, accelerator, main_process_only):
+        super().__init__(config=config, accelerator=accelerator, main_process_only=main_process_only)
         self.config = config
         self.accelerator = accelerator
         
@@ -122,6 +122,10 @@ class VEMModel(StandardModel):
         est_loss = 0.
         for _, data in enumerate(self.loader_test):
             lq, hq, sigma = data['lq'], data['hq'], data['sigma']
+            
+            if self.main_process_only:
+                lq, hq = lq.to(self.device), hq.to(self.device)
+                sigma = sigma.to(self.device)
             
             denoise, est_sigma = self.net(lq, step='E')
             

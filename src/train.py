@@ -60,8 +60,10 @@ def main(args, config, accelerator):
         tracker = Tracker(config=config, verbose=args.verbose)
         tracker.store_init_config(config=config)
     accelerator.wait_for_everyone()
-    trainer = build_model(accelerator=accelerator, config=config)
+    
     if accelerator.num_processes == 1:
         args.eval_ddp = False
-    trainer.main_process_only = not args.eval_ddp
+    
+    trainer = build_model(accelerator=accelerator, config=config, main_process_only=not args.eval_ddp)
+    
     train(model=trainer, tracker=tracker)

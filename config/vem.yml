@@ -1,4 +1,4 @@
-seed: 10
+seed: 2018
 root_dir: results
 run_name: vem_wf_32
 
@@ -9,7 +9,7 @@ model:
     train_freq: 50
     test_freq: 2000
     save_freq: !!float 5e3
-    iteration: !!float 4e5
+    iteration: !!float 2e6
     gradient_accumulation: 1
 
     best_metric: 
@@ -34,21 +34,21 @@ model:
             betas: [0.9, 0.99]
 
     schedule:
-        name: CosineAnnealingLR
-        T_max : 3200000 # 单卡 4e5 x 8 (gpu个数)
-        eta_min : 1.e-6
+        name: cosine
+        num_warmup_steps: 0
+        num_training_steps: !!float 2e6
 
 data:
     train:
         name: SimuteNIDDGaussian
         param:
             hq_path: /data/dataset/low_level/lsdir/
-            length: 50000
+            length: 320000
             patch_size: 128
-            augment: False
-            sigma_min: 0
+            augment: false
+            sigma_min: 10
             sigma_max: 75
-            sigma_iid: [10, 25, 30, 50, 70]
+            sigma_iid: [10, 25, 30, 40, 50, 70, 75]
     test:
         name: VDNSimuTest
         param:
@@ -83,12 +83,12 @@ arch:
             winsize: 8
             mlp_ratio_s: 2
             mlp_ratio_c: 2
-            drop_prob_s: 0.1
-            drop_prob_c: 0.1
+            drop_prob_s: 0.02
+            drop_prob_c: 0.02
             bias: False
             pool: False
             pool_mode: conv
-            shortcut_prob: 0.5
+            shortcut_prob: 0.01
 
 loss:
     PSNRLoss:
