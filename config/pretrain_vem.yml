@@ -1,6 +1,6 @@
 seed: 2017
 root_dir: results
-run_name: VEModelPretrain-SSCT
+run_name: VEModelPretrain-SSCT-Test
 
 
 model:
