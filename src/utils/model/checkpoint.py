@@ -8,10 +8,11 @@ import os
 import torch
 import shutil
 import logging
-import datetime
+
 import coloredlogs
 import numpy as np
 
+from datetime import datetime
 from accelerate.state import PartialState
 
 logger = logging.getLogger(__name__)
@@ -21,13 +22,17 @@ state = PartialState()
 
 @state.on_local_main_process
 def backup(root_dir, source_input):
+    # logger.warning(f"[backup] : device[{state.device}]: backup")
     time_stamp = datetime.now().strftime("%Y%m%d_%H%M")
     path = os.path.join(root_dir, f"resume_{time_stamp}")
-    if not os.path.exists(path):
-        os.mkdir(path)
+    # if not os.path.exists(path):
+    #     logger.warning("backup - 1")
+    #     os.mkdir(path)
     if os.path.isdir(source_input):
+        # logger.warning("backup - 2")
         shutil.copytree(source_input, path)
     elif os.path.isfile(source_input, path):
+        # logger.warning("backup - 3")
         shutil.copy(source_input, path)
     else:
         raise ValueError(f"source input must be a file or directory, but received {source_input}")
@@ -65,8 +70,8 @@ def load_state_accelerate(accelerator, root_dir, resume_state):
     custom_register = torch.load(custom_check)
 
     ret = dict(
-        last_epoch=custom_register['last_epoch'],
-        last_iter=custom_register['last_epoch'],
+        last_epoch=custom_register['last_epoch'] // accelerator.num_processes,
+        last_iter=custom_register['last_epoch'] // accelerator.num_processes,
         step_count=custom_register['_step_count'],
         last_lr=custom_register['_last_lr']
     )
