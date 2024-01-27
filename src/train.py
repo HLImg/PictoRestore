@@ -4,12 +4,6 @@
 # @FileName : train.py
 # @Email : lianghao@whu.edu.cn
 
-# -*- coding: utf-8 -*-
-# @Time : 2024/1/12
-# @Author : Liang Hao
-# @FileName : train
-# @Email : lianghao@whu.edu.cn
-
 import os
 import torch
 

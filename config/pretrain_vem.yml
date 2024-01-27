@@ -1,6 +1,6 @@
 seed: 2017
 root_dir: results
-run_name: VEModelPretrain-SSCT-Test
+run_name: VEModelPretrain-SSCT
 
 
 model:
@@ -20,7 +20,7 @@ model:
         train:
             batch_size: 4
             shuffle: True
-            num_workers: 2
+            num_workers: 6
         test:
             batch_size: 1
             shuffle: False
