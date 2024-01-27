@@ -3,5 +3,3 @@
 # @Author : Liang Hao
 # @FileName : __init__.py
 # @Email : lianghao@whu.edu.cn
-
-from .vem import *
